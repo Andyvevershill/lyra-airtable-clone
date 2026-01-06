@@ -1,39 +1,72 @@
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { bases } from "@/server/db/schemas/table-schemas";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
-import { posts } from "@/server/db/schema";
-
-export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
+export const baseRouter = createTRPCRouter({
+  // Create a new base
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(
+      z.object({
+        name: z.string().min(1).max(255),
+        icon: z.string().optional(),
+        color: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(posts).values({
-        name: input.name,
-        createdById: ctx.session.user.id,
-      });
+      const [base] = await ctx.db
+        .insert(bases)
+        .values({
+          name: input.name,
+          icon: input.icon,
+          color: input.color,
+          userId: ctx.session.user.id,
+        })
+        .returning();
+
+      return base;
     }),
 
-  getLatest: protectedProcedure.query(async ({ ctx }) => {
-    const post = await ctx.db.query.posts.findFirst({
-      orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-    });
-
-    return post ?? null;
+  // List all bases for current user (sorted by most recently accessed)
+  list: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db
+      .select()
+      .from(bases)
+      .where(eq(bases.userId, ctx.session.user.id))
+      .orderBy(desc(bases.lastAccessedAt));
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
+  // Get a single base by ID
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [base] = await ctx.db
+        .select()
+        .from(bases)
+        .where(eq(bases.id, input.id))
+        .limit(1);
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
+
+  // Update last accessed timestamp
+  updateLastAccessed: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [base] = await ctx.db
+        .update(bases)
+        .set({ lastAccessedAt: new Date() })
+        .where(eq(bases.id, input.id))
+        .returning();
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
 });
