@@ -1,6 +1,6 @@
 import { getSession } from "@/server/better-auth/server";
+import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
-import GoogleSignOutButton from "../_components/buttons/google-sign-out-button";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -9,12 +9,15 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
+  const bases = await api.base.list();
+  console.log(bases);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center text-black">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+    <main className="flex h-full flex-col items-center justify-center overflow-hidden bg-gray-50">
+      <div className="flex flex-col items-center justify-center gap-12">
         <h1 className="text-4xl font-bold">Welcome to the Dashboard</h1>
+        <p className="text-lg">User ID: {session.user.id}</p>
       </div>
-      <GoogleSignOutButton />
     </main>
   );
 }
