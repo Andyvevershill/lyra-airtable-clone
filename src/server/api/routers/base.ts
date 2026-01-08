@@ -1,40 +1,12 @@
+import { DEFAULT_BASE_CONFIG, getRandomColor } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { bases, cells, columns, rows, tables } from "@/server/db/schemas/bases";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-
-const DEFAULT_BASE_CONFIG = {
-  name: "Untitled Base",
-  colors: [
-    "#FF6B6B",
-    "#4ECDC4",
-    "#45B7D1",
-    "#FFA07A",
-    "#98D8C8",
-    "#F7DC6F",
-    "#BB8FCE",
-    "#85C1E2",
-  ],
-  columns: [
-    { name: "Name", type: "text", position: 0 },
-    { name: "Notes", type: "text", position: 1 },
-    { name: "Assignee", type: "text", position: 2 },
-    { name: "Status", type: "text", position: 3 },
-    { name: "Attachments", type: "text", position: 4 },
-    { name: "Attachment Summary", type: "text", position: 5 },
-  ],
-  defaultTableName: "Table 1",
-  defaultRowCount: 3,
-} as const;
-
-const getRandomColor = () => {
-  const colors = DEFAULT_BASE_CONFIG.colors;
-  return colors[Math.floor(Math.random() * colors.length)];
-};
 
 export const baseRouter = createTRPCRouter({
   // Create a new base
-  create: protectedProcedure
+  createById: protectedProcedure
     .input(z.object({})) // Empty input - no user input needed
     .mutation(async ({ ctx }) => {
       const result = await ctx.db.transaction(async (tx) => {
@@ -106,19 +78,41 @@ export const baseRouter = createTRPCRouter({
     }),
 
   // List all bases for current user (sorted by most recently accessed)
-  list: protectedProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db
       .select()
       .from(bases)
-      .where(eq(bases.userId, ctx.session.user.id));
+      .where(eq(bases.userId, ctx.session.user.id))
+      .orderBy(desc(bases.lastAccessedAt));
   }),
 
-  // Get a single base by ID
+  // Get a single base by ID with just basic info for the base itself e.g. name, color
+  getMetaById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const base = await ctx.db.query.bases.findFirst({
+        where: and(
+          eq(bases.id, input.id),
+          eq(bases.userId, ctx.session.user.id),
+        ),
+      });
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
+
+  // Get a single base by ID with tables, columns, rows and cells
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const base = await ctx.db.query.bases.findFirst({
-        where: eq(bases.id, input.id),
+        where: and(
+          eq(bases.id, input.id),
+          eq(bases.userId, ctx.session.user.id),
+        ),
         with: {
           tables: {
             with: {
@@ -140,6 +134,38 @@ export const baseRouter = createTRPCRouter({
       return base;
     }),
 
+  updateNameById: protectedProcedure
+    .input(z.object({ baseId: z.string(), name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [base] = await ctx.db
+        .update(bases)
+        .set({ name: input.name })
+        .where(eq(bases.id, input.baseId))
+        .returning();
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
+
+  updateFavouriteById: protectedProcedure
+    .input(z.object({ baseId: z.string(), favourite: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const [base] = await ctx.db
+        .update(bases)
+        .set({ isFavourite: input.favourite })
+        .where(eq(bases.id, input.baseId))
+        .returning();
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
+
   // Update last accessed timestamp
   updateLastAccessed: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -147,6 +173,21 @@ export const baseRouter = createTRPCRouter({
       const [base] = await ctx.db
         .update(bases)
         .set({ lastAccessedAt: new Date() })
+        .where(eq(bases.id, input.id))
+        .returning();
+
+      if (!base || base.userId !== ctx.session.user.id) {
+        throw new Error("Base not found");
+      }
+
+      return base;
+    }),
+
+  deleteById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [base] = await ctx.db
+        .delete(bases)
         .where(eq(bases.id, input.id))
         .returning();
 
