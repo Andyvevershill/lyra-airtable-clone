@@ -49,7 +49,8 @@ export default function BaseCard({ base }: props) {
           />
         </div>
       ) : (
-        isFavourite && (
+        isFavourite &&
+        !editMode && (
           <div className="absolute top-4 right-4">
             <Star size={16} className="fill-yellow-500 text-yellow-500" />
           </div>

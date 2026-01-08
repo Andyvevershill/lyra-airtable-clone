@@ -10,14 +10,16 @@ export default async function Layout({
   params,
 }: {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   // grabbed the session (for log out and account info) and base for the top bar (changing base name, colour, icon)
   const session = await getSession();
   if (!session) redirect("/");
 
+  const { id } = await params;
+
   const base = await api.base.getById({
-    id: params.id,
+    id: id,
   });
 
   if (!base) redirect("/");

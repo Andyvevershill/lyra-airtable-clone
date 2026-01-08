@@ -1,6 +1,6 @@
 "use server";
 
-import { api } from "@/trpc/server";
+// import { api } from "@/trpc/server";
 import { getSession } from "better-auth/api";
 import { redirect } from "next/navigation";
 
@@ -9,7 +9,7 @@ export default async function BaseByIdPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = getSession();
+  const session = await getSession();
   const { id } = await params;
 
   // we need to create a server action here that fetches the base by ID AND by the user ID from the session!! In real life there will be many users!
@@ -19,7 +19,7 @@ export default async function BaseByIdPage({
     redirect("/auth/login");
   }
 
-  const base = await api.base.getById({ id });
+  // const base = await api.base.getById({ id });
   // console.log(JSON.stringify(base));
 
   return (
