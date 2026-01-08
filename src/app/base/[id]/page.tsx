@@ -1,6 +1,6 @@
 "use server";
 
-import { api } from "@/trpc/server";
+// import { api } from "@/trpc/server";
 import { getSession } from "better-auth/api";
 import { redirect } from "next/navigation";
 
@@ -19,8 +19,8 @@ export default async function BaseByIdPage({
     redirect("/auth/login");
   }
 
-  const base = await api.base.getById({ id });
-  console.log(JSON.stringify(base));
+  // const base = await api.base.getById({ id });
+  // console.log(JSON.stringify(base));
 
   return (
     <main className="flex h-full flex-col items-center justify-center overflow-hidden">

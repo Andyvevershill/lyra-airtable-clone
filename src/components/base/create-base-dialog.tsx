@@ -1,5 +1,6 @@
 "use client";
 
+import { useSavingStore } from "@/app/stores/use-saving-store";
 import {
   Dialog,
   DialogContent,
@@ -14,25 +15,24 @@ import { useRouter } from "next/navigation";
 
 export default function CreateBaseDialog() {
   const router = useRouter();
+  const setIsSaving = useSavingStore((state) => state.setIsSaving);
 
-  const createBase = api.base.create.useMutation();
+  const createBase = api.base.createById.useMutation();
 
   async function handleBaseCreation() {
-    try {
-      // USING MUTATEASYNC RETURNS THE VAL!
-      const res = await createBase.mutateAsync({});
+    setIsSaving(true);
+    // USING MUTATEASYNC RETURNS THE VAL!
+    const res = await createBase.mutateAsync({});
 
-      // Now redirect to the new base
-      router.push(`/base/${res.base.id}`);
-    } catch (error) {
-      console.error("Failed to create base:", error);
-    }
+    // Now redirect to the new base
+    setIsSaving(false);
+    router.push(`/base/${res.base.id}`);
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="m-3 flex h-8 w-[275px] items-center justify-center rounded bg-[#166ee1] py-2 text-xs font-medium text-white hover:cursor-pointer">
+        <button className="pointer m-3 flex h-8 w-[275px] items-center justify-center rounded bg-[#166ee1] py-2 text-xs font-medium text-white">
           <Plus size={16} className="mr-2 shrink-0" /> Create
         </button>
       </DialogTrigger>

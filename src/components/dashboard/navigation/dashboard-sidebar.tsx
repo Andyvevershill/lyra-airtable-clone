@@ -17,7 +17,7 @@ import { GoHome } from "react-icons/go";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { LuPanelTopOpen } from "react-icons/lu";
 import { PiShare } from "react-icons/pi";
-import CreateBaseDialog from "./create-base-dialog";
+import CreateBaseDialog from "../../base/create-base-dialog";
 
 const items = [
   {
@@ -61,7 +61,7 @@ export function DashboardSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="flex w-[300px]"
+      className="border border-gray-200"
       onMouseEnter={handleMouseEntry}
       onMouseLeave={handleMouseLeave}
     >
@@ -74,7 +74,7 @@ export function DashboardSidebar() {
                 {items.map((item) => (
                   <SidebarMenuItem
                     key={item.title}
-                    className="items-center justify-center hover:cursor-pointer"
+                    className="pointer items-center justify-center"
                   >
                     <SidebarMenuButton asChild>
                       <div className="h-[40px] rounded-xs">
@@ -111,7 +111,7 @@ export function DashboardSidebar() {
             {footerItems.map((item) => (
               <SidebarMenuItem
                 key={item.title}
-                className="list-none p-0 hover:cursor-pointer"
+                className="pointer list-none p-0"
               >
                 <SidebarMenuButton asChild>
                   <a
