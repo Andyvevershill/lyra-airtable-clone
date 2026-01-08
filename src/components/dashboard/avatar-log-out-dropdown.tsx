@@ -16,9 +16,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface Props {
   user: User;
+  align?: "start" | "center" | "end";
 }
 
-export function AvatarLogOutDropdown({ user }: Props) {
+export function AvatarLogOutDropdown({ user, align = "center" }: Props) {
   const router = useRouter();
   const handleGoogleLogout = async () => {
     try {
@@ -30,10 +31,10 @@ export function AvatarLogOutDropdown({ user }: Props) {
   };
 
   return (
-    <Menubar className="border-0">
+    <Menubar className="border-0 shadow-none">
       <MenubarMenu>
         <MenubarTrigger>
-          <Avatar className="h-7 w-7 hover:cursor-pointer">
+          <Avatar className="pointer h-7 w-7">
             {user.image && (
               <AvatarImage
                 src={user.image}
@@ -49,7 +50,7 @@ export function AvatarLogOutDropdown({ user }: Props) {
         </MenubarTrigger>
         <MenubarContent
           className="z-1000 mr-3.5 p-5 text-sm md:w-76"
-          align="center"
+          align={align}
         >
           <div className="height-10 mb-4 ml-2 flex flex-col justify-center gap-2">
             <p>{user.name}</p>
@@ -57,7 +58,7 @@ export function AvatarLogOutDropdown({ user }: Props) {
           </div>
           <MenubarSeparator />
           <MenubarItem
-            className="mt-4 hover:cursor-pointer"
+            className="pointer mt-4"
             onClick={() => handleGoogleLogout()}
           >
             <MdOutlineLogout /> Log out

@@ -16,7 +16,7 @@ export default function GoogleSignInButton() {
 
   return (
     <button
-      className="flex h-10 flex-row items-center justify-center rounded-sm border border-gray-200 bg-white px-10 py-2 text-black shadow-xs transition hover:cursor-pointer hover:shadow-sm md:w-125"
+      className="pointer flex h-10 flex-row items-center justify-center rounded-sm border border-gray-200 bg-white px-10 py-2 text-black shadow-xs transition hover:shadow-sm md:w-125"
       onClick={handleSocialLogin}
     >
       <FcGoogle className="h-7 w-7 pr-2 font-sans" />
