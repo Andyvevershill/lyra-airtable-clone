@@ -1,19 +1,14 @@
-import type { Base } from "@/types/bases";
+import type { BaseWithTables } from "@/types/base";
 import BasesGridView from "./bases-grid-view";
 
 interface Props {
-  bases: Base[];
+  bases: BaseWithTables[];
   viewMode: "grid" | "list";
 }
 
 export default function BaseContainer({ bases, viewMode }: Props) {
   return (
-    <div className="flex w-full flex-1 flex-row">
-      {/*  TITLE FOR ALL EXPECT "TODAY" */}
-      {/* <div className="mb-6">
-        <h2 className="text-sm">Today</h2>
-      </div> */}
-
+    <div className="flex w-full flex-1 flex-row items-start">
       {viewMode === "grid" && <BasesGridView bases={bases} />}
     </div>
   );

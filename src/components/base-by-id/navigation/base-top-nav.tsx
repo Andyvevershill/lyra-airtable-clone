@@ -1,6 +1,6 @@
 "use client";
 
-import type { Base } from "@/types/bases";
+import type { Base } from "@/types/base";
 import { TopNavBaseActions } from "../top-nav-base-actions";
 import TopNavButtons from "../top-nav-buttons";
 import TopNavTabs from "../top-nav-tabs";
@@ -26,11 +26,11 @@ export function BaseTopNav({ base }: props) {
 
       {/* middle tab section */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <TopNavTabs colour={base.color} />
+        <TopNavTabs colour={base.colour} />
       </div>
 
       {/* Right: help icon, bell icon, avatar */}
-      <TopNavButtons colour={base.color} />
+      <TopNavButtons colour={base.colour} />
     </div>
   );
 }

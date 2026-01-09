@@ -1,12 +1,12 @@
 import { useSavingStore } from "@/app/stores/use-saving-store";
 import { api } from "@/trpc/react";
-import type { Base } from "@/types/bases";
+import type { BaseWithTables } from "@/types/base";
 import { useRouter } from "next/navigation";
 import { BiCoinStack } from "react-icons/bi";
 import { Input } from "../ui/input";
 
 interface Props {
-  base: Base;
+  base: BaseWithTables;
   nameState: [string, React.Dispatch<React.SetStateAction<string>>];
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 }

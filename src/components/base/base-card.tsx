@@ -2,7 +2,7 @@
 
 import { getLastAccessed } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import type { Base } from "@/types/bases";
+import type { BaseWithTables } from "@/types/base";
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,35 +11,43 @@ import { BaseActionsDropdown } from "./base-actions-dropdown";
 import BaseEditMode from "./base-edit-mode";
 
 interface props {
-  base: Base;
+  base: BaseWithTables;
 }
 
 export default function BaseCard({ base }: props) {
   const [onHover, setOnHover] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  // used for optimistic rendering when changing the base name + favourite
   const [baseName, setBaseName] = useState(base.name);
   const [isFavourite, setIsFavourite] = useState(base.isFavourite);
 
   const router = useRouter();
+  const utils = api.useUtils();
   const updateLastAccessed = api.base.updateLastAccessed.useMutation();
 
   function handleRedirect() {
-    // update last accessed when we press into the base
-    updateLastAccessed.mutate({
-      id: base.id,
-    });
+    updateLastAccessed.mutate({ id: base.id });
     router.push(`/base/${base.id}`);
+  }
+
+  function handleHover() {
+    // Prefetch base data
+    utils.base.getById.prefetch({ id: base.id });
+
+    // Prefetch first table data
+    if (base.tables[0]?.id) {
+      utils.table.getById.prefetch({ tableId: base.tables[0]?.id });
+    }
+
+    setOnHover(true);
   }
 
   return (
     <div
-      className="pointer relative flex h-25 w-78 flex-row gap-4 rounded-md border border-gray-200 bg-white p-4 shadow-2xs hover:shadow-md"
+      className="pointer relative flex h-25 w-75 flex-row gap-4 rounded-md border border-gray-200 bg-white p-4 shadow-2xs hover:shadow-md"
       onClick={handleRedirect}
-      onMouseEnter={() => setOnHover(true)}
+      onMouseEnter={handleHover}
       onMouseLeave={() => setOnHover(false)}
     >
-      {/* Dropdown in top right - only visible on hover */}
       {onHover && !editMode ? (
         <div className="absolute top-3 right-3">
           <BaseActionsDropdown
@@ -58,8 +66,8 @@ export default function BaseCard({ base }: props) {
       )}
 
       <div
-        className="flex h-14 w-14 items-center justify-center rounded-lg"
-        style={{ backgroundColor: base.color }}
+        className="IC flex h-14 w-14 rounded-lg"
+        style={{ backgroundColor: base.colour }}
       >
         <p className="flex text-2xl text-white capitalize">
           {base.name.slice(0, 2)}
