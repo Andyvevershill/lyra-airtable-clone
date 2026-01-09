@@ -22,7 +22,8 @@ export default function CreateBaseDialog() {
   async function handleBaseCreation() {
     setIsSaving(true);
     // USING MUTATEASYNC RETURNS THE VAL!
-    const res = await createBase.mutateAsync({});
+
+    const res = await createBase.mutateAsync();
 
     // Now redirect to the new base
     setIsSaving(false);
@@ -32,7 +33,7 @@ export default function CreateBaseDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="pointer m-3 flex h-8 w-[275px] items-center justify-center rounded bg-[#166ee1] py-2 text-xs font-medium text-white">
+        <button className="pointer IC m-3 flex h-8 w-[275px] rounded bg-[#166ee1] py-2 text-xs font-medium text-white">
           <Plus size={16} className="mr-2 shrink-0" /> Create
         </button>
       </DialogTrigger>
@@ -45,7 +46,7 @@ export default function CreateBaseDialog() {
         </DialogHeader>
         {/* Remove DialogDescription wrapper, just use a div */}
         <div className="flex-grid flex gap-2 p-4">
-          <div className="mt-1.5 hidden items-center justify-center lg:flex">
+          <div className="IC mt-1.5 hidden lg:flex">
             <Image
               src="/purple-build-an-app-image.png"
               alt="Login illustration"
@@ -55,7 +56,7 @@ export default function CreateBaseDialog() {
               className="cursor-pointer transition-transform duration-300 ease-out hover:scale-101"
             />
           </div>
-          <div className="hidden items-center justify-center lg:flex">
+          <div className="IC hidden lg:flex">
             <Image
               onClick={handleBaseCreation}
               src="/blue-build-an-app-image.png"

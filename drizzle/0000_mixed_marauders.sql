@@ -1,9 +1,9 @@
 CREATE TABLE "base" (
 	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
 	"name" text NOT NULL,
 	"icon" text,
-	"color" text NOT NULL,
-	"user_id" text NOT NULL,
+	"colour" text NOT NULL,
 	"is_favourite" boolean NOT NULL,
 	"last_accessed_at" timestamp NOT NULL,
 	"created_at" timestamp NOT NULL,
@@ -24,14 +24,16 @@ CREATE TABLE "column" (
 	"name" text NOT NULL,
 	"type" text NOT NULL,
 	"position" integer NOT NULL,
-	"created_at" timestamp NOT NULL
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "row" (
 	"id" text PRIMARY KEY NOT NULL,
 	"table_id" text NOT NULL,
 	"position" integer NOT NULL,
-	"created_at" timestamp NOT NULL
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "table" (
@@ -39,10 +41,10 @@ CREATE TABLE "table" (
 	"base_id" text NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
+	"is_favourite" boolean NOT NULL,
 	"last_accessed_at" timestamp,
 	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp,
-	"is_favourite" boolean NOT NULL
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "view" (

@@ -5,11 +5,45 @@ import {
   index,
   integer,
   json,
+  pgEnum,
   pgTable,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { user } from "./users";
+
+export type ColumnType = "text" | "number";
+
+export type FilterOperator =
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "not_contains"
+  | "greater_than"
+  | "less_than"
+  | "greater_than_or_equal"
+  | "less_than_or_equal";
+
+export interface ViewFilter {
+  columnId: string;
+  operator: FilterOperator;
+  value: string;
+}
+
+export interface ViewSort {
+  columnId: string;
+  direction: "asc" | "desc";
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Enums                                    */
+/* -------------------------------------------------------------------------- */
+
+export const columnTypeEnum = pgEnum("column_type", ["text", "number"]);
+
+/* -------------------------------------------------------------------------- */
+/*                                   Tables                                   */
+/* -------------------------------------------------------------------------- */
 
 export const bases = pgTable(
   "base",
@@ -18,18 +52,18 @@ export const bases = pgTable(
       .notNull()
       .primaryKey()
       .$defaultFn(() => createId()),
-    name: text("name").notNull(),
-    icon: text("icon"),
-    color: text("color").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+
+    name: text("name").notNull(),
+    icon: text("icon"),
+    colour: text("colour").notNull(),
     isFavourite: boolean("is_favourite")
       .$defaultFn(() => false)
       .notNull(),
-    lastAccessedAt: timestamp("last_accessed_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
+
+    lastAccessedAt: timestamp("last_accessed_at").notNull(),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -41,25 +75,6 @@ export const bases = pgTable(
   ],
 );
 
-// when we create a new one, we need to:
-
-// set base name to "Untitled Base"
-// set colour to a random colour
-// set user ID to whoever is in session
-/// created at + updated + lastAccessedAt at are sorted automatically
-
-// create a table
-// set baseID of table to the new base we have just created
-// set table name to "Table 1"
-/// created at + updated + lastAccessedAt at are sorted automatically
-
-// create 6 cols: 0-5
-// Name, Notes, Assignee, Status, Attachments, Attachment Summary
-
-// create 3 empty rows: 0-2
-
-// create 3*6 cells for each row
-
 export const tables = pgTable(
   "table",
   {
@@ -70,16 +85,18 @@ export const tables = pgTable(
     baseId: text("base_id")
       .notNull()
       .references(() => bases.id, { onDelete: "cascade" }),
+
     name: text("name").notNull(),
     description: text("description"),
+    isFavourite: boolean("is_favourite")
+      .$defaultFn(() => false)
+      .notNull(),
+
     lastAccessedAt: timestamp("last_accessed_at").$defaultFn(() => new Date()),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-    isFavourite: boolean("is_favourite")
-      .$defaultFn(() => false)
-      .notNull(),
   },
   (table) => [
     index("table_base_idx").on(table.baseId),
@@ -97,12 +114,15 @@ export const columns = pgTable(
     tableId: text("table_id")
       .notNull()
       .references(() => tables.id, { onDelete: "cascade" }),
+
     name: text("name").notNull(),
     type: text("type").notNull(), // 'text' | 'number'
     position: integer("position").notNull(),
+
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
     index("column_table_idx").on(table.tableId),
@@ -120,10 +140,13 @@ export const rows = pgTable(
     tableId: text("table_id")
       .notNull()
       .references(() => tables.id, { onDelete: "cascade" }),
+
     position: integer("position").notNull(),
+
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
     index("row_table_idx").on(table.tableId),
@@ -144,7 +167,9 @@ export const cells = pgTable(
     columnId: text("column_id")
       .notNull()
       .references(() => columns.id, { onDelete: "cascade" }),
+
     value: text("value"),
+
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [

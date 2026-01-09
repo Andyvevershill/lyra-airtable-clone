@@ -17,7 +17,7 @@ export default async function SignInPage() {
     <HydrateClient>
       <div className="mx-20 grid min-h-screen lg:grid-cols-2">
         {/* left grid */}
-        <div className="flex items-center justify-center px-8">
+        <div className="IC flex px-8">
           <div className="-mt-96 flex flex-col gap-12 lg:items-start">
             <Image
               src="/airtable-icon.png"
@@ -36,7 +36,7 @@ export default async function SignInPage() {
         </div>
 
         {/* right grid */}
-        <div className="mt-12 hidden items-center justify-center lg:flex">
+        <div className="IC mt-12 hidden lg:flex">
           <Image
             src="/log-in-image.png"
             alt="Login illustration"

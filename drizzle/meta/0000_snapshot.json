@@ -1,5 +1,5 @@
 {
-  "id": "e9ee6124-1a13-4710-a140-8f1f1a65eb63",
+  "id": "cf933a38-48be-471b-942c-87a65cf7fcc1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -14,6 +14,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -26,14 +32,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
+        "colour": {
+          "name": "colour",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -283,6 +283,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -371,6 +377,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -460,6 +472,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "is_favourite": {
+          "name": "is_favourite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
         "last_accessed_at": {
           "name": "last_accessed_at",
           "type": "timestamp",
@@ -477,12 +495,6 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
-        },
-        "is_favourite": {
-          "name": "is_favourite",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
         }
       },
       "indexes": {

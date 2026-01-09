@@ -1,6 +1,6 @@
-import { BaseSidebar } from "@/components/base-by-id/navigation/base-sidebar";
 import { BaseTopNav } from "@/components/base-by-id/navigation/base-top-nav";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { BaseSideRail } from "@/components/base/base-side-rail";
+import TabContainer from "@/components/tabs/tab-container";
 import { getSession } from "@/server/better-auth/server";
 import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
@@ -12,34 +12,24 @@ export default async function Layout({
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
-  // grabbed the session (for log out and account info) and base for the top bar (changing base name, colour, icon)
   const session = await getSession();
   if (!session) redirect("/");
 
   const { id } = await params;
-
-  const base = await api.base.getById({
-    id: id,
-  });
-
+  const base = await api.base.getById({ id });
   if (!base) redirect("/");
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "56px",
-        } as React.CSSProperties
-      }
-    >
-      <BaseSidebar user={session.user} />
+    <div className="flex h-screen w-full">
+      {/* Fixed left sidebar (56px) */}
+      <BaseSideRail user={session.user} />
 
-      <SidebarInset>
-        <div className="flex h-screen flex-col overflow-hidden">
-          <BaseTopNav base={base} />
-          <main className="flex-1 overflow-auto">{children}</main>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      {/* Main content area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <BaseTopNav base={base} />
+        <TabContainer base={base} />
+        <main className="relative flex-1 overflow-hidden">{children}</main>
+      </div>
+    </div>
   );
 }

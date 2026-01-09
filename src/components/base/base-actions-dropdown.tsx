@@ -9,7 +9,7 @@ import {
   MenubarSeparator,
 } from "@/components/ui/menubar";
 import { api } from "@/trpc/react";
-import type { Base } from "@/types/bases";
+import type { BaseWithTables } from "@/types/base";
 import { MenubarTrigger } from "@radix-ui/react-menubar";
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import { GoPencil } from "react-icons/go";
 import { RiDeleteBinLine } from "react-icons/ri";
 
 interface Props {
-  base: Base;
+  base: BaseWithTables;
   favouriteState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -61,29 +61,6 @@ export function BaseActionsDropdown({
     },
   });
 
-  // const renameBase = api.base.updateNameById.useMutation({
-  //   onMutate: () => {
-  //     setIsSaving(true);
-  //   },
-  //   onSuccess: () => {
-  //     router.refresh();
-  //   },
-  //   onSettled: () => {
-  //     setIsSaving(false);
-  //   },
-  // });
-
-  // const handleRename = () => {
-  //   const newName = prompt("Enter a new name for the base");
-  //   if (newName && newName.trim()) {
-  //     setBaseName(newName.trim());
-  //     renameBase.mutate({
-  //       baseId: base.id,
-  //       name: newName.trim(),
-  //     });
-  //   }
-  // };
-
   const handleDelete = () => {
     if (confirm(`Delete "${base.name}"?`)) {
       deleteBase.mutate({ id: base.id });
@@ -107,7 +84,7 @@ export function BaseActionsDropdown({
         <Menubar className="h-8 w-8 border-0 bg-transparent p-0">
           <MenubarMenu>
             <MenubarTrigger asChild>
-              <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-transform hover:bg-gray-100 active:scale-95">
+              <div className="IC flex h-8 w-8 cursor-pointer rounded-md transition-transform hover:border-gray-400 hover:bg-gray-100 active:scale-95">
                 <Star
                   size={16}
                   className={
@@ -127,7 +104,7 @@ export function BaseActionsDropdown({
       <div className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
         <Menubar className="h-8 w-8 border-0 bg-transparent p-0">
           <MenubarMenu>
-            <MenubarTrigger className="pointer flex h-8 w-8 items-center justify-center rounded-md transition-transform hover:bg-gray-100 active:scale-95">
+            <MenubarTrigger className="pointer IC flex h-8 w-8 rounded-md transition-transform hover:border-gray-400 hover:bg-gray-100 active:scale-95">
               <BsThreeDots size={16} />
             </MenubarTrigger>
             <MenubarContent

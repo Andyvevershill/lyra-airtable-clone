@@ -1,16 +1,22 @@
+"use client";
+
+import NoBases from "@/components/base/no-bases";
 import DashboardContainer from "@/components/dashboard/dashboard-container";
-import { getSession } from "@/server/better-auth/server";
-import { api } from "@/trpc/server";
-import { redirect } from "next/navigation";
+import { api } from "@/trpc/react";
 
-export default async function DashboardPage() {
-  const session = await getSession();
+export default function DashboardPage() {
+  // Fetch bases (will use cached data if prefetched from sidebar)
+  const { data: bases, isLoading } = api.base.getAll.useQuery();
 
-  if (!session) {
-    redirect("/");
+  if (isLoading) return null;
+
+  if (!bases || bases.length === 0) {
+    return (
+      <div className="IC flex h-full w-full">
+        <NoBases />
+      </div>
+    );
   }
-
-  const bases = await api.base.getAll();
 
   return <DashboardContainer bases={bases} />;
 }
