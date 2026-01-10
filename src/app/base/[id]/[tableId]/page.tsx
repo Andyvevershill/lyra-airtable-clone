@@ -65,7 +65,7 @@ export default function TablePage() {
         tableId={tableWithViews.id}
         columns={columns}
         rowsWithCells={rowsWithCells}
-        rowCount={rowCount || 0}
+        rowCount={rowCount ?? 0}
         fetchNextPage={fetchNextPage}
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}

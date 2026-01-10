@@ -17,10 +17,10 @@ export default function AddColumnButton({ tableId }: Props) {
     },
     onSuccess: () => {
       // Invalidate columns query to refetch
-      utils.column.getTableColumns.invalidate({ tableId });
+      void utils.column.getTableColumns.invalidate({ tableId });
 
       // Invalidate rows query to get cells for new column
-      utils.row.getRowsInfinite.invalidate({ tableId });
+      void utils.row.getRowsInfinite.invalidate({ tableId });
     },
     onError: (error) => {
       console.error("Failed to add column:", error);
