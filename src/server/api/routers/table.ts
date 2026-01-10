@@ -2,7 +2,7 @@ import { DEFAULT_BASE_CONFIG } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { cells, columns, rows, tables } from "@/server/db/schemas/bases";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const tableRouter = createTRPCRouter({
@@ -82,29 +82,6 @@ export const tableRouter = createTRPCRouter({
         .orderBy(desc(tables.lastAccessedAt));
     }),
 
-  // Get a single table by ID with columns, rows and cells
-  getById: protectedProcedure
-    .input(z.object({ tableId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const table = await ctx.db.query.tables.findFirst({
-        where: eq(tables.id, input.tableId),
-        with: {
-          columns: true,
-          rows: {
-            with: {
-              cells: true,
-            },
-          },
-        },
-      });
-
-      if (!table) {
-        throw new Error("Table not found");
-      }
-
-      return table;
-    }),
-
   // update name
   updateNameById: protectedProcedure
     .input(z.object({ tableId: z.string(), name: z.string() }))
@@ -129,15 +106,12 @@ export const tableRouter = createTRPCRouter({
       await ctx.db.delete(tables).where(eq(tables.id, input.id)).returning();
     }),
 
-  getTableShell: protectedProcedure
+  getTableWithViews: protectedProcedure
     .input(z.object({ tableId: z.string() }))
     .query(async ({ ctx, input }) => {
       const table = await ctx.db.query.tables.findFirst({
         where: eq(tables.id, input.tableId),
         with: {
-          columns: {
-            orderBy: (columns, { asc }) => [asc(columns.position)],
-          },
           views: true,
         },
       });
@@ -149,16 +123,6 @@ export const tableRouter = createTRPCRouter({
         });
       }
 
-      const countResult = await ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(rows)
-        .where(eq(rows.tableId, input.tableId));
-
-      const rowCount = countResult[0]?.count ?? 0;
-
-      return {
-        ...table,
-        rowCount,
-      };
+      return table;
     }),
 });

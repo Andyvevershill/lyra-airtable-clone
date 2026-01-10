@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
+import { relations, type InferSelectModel } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -130,6 +130,8 @@ export const columns = pgTable(
   ],
 );
 
+export type Column = InferSelectModel<typeof columns>;
+
 export const rows = pgTable(
   "row",
   {
@@ -153,6 +155,8 @@ export const rows = pgTable(
     index("row_position_idx").on(table.tableId, table.position),
   ],
 );
+
+export type Row = InferSelectModel<typeof rows>;
 
 export const cells = pgTable(
   "cell",
@@ -179,6 +183,8 @@ export const cells = pgTable(
     index("cell_row_column_unique_idx").on(table.rowId, table.columnId),
   ],
 );
+
+export type Cell = InferSelectModel<typeof cells>;
 
 export const views = pgTable(
   "view",
@@ -211,6 +217,8 @@ export const views = pgTable(
   },
   (table) => [index("view_table_idx").on(table.tableId)],
 );
+
+export type View = InferSelectModel<typeof views>;
 
 // Relations
 
