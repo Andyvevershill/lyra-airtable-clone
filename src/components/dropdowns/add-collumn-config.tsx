@@ -36,20 +36,7 @@ import {
   TbUserBolt,
 } from "react-icons/tb";
 
-type FieldColour = "green" | "blue" | "purple" | "orange" | "slate";
-
-export interface FieldAgent {
-  icon: any;
-  name: string;
-  colour: FieldColour;
-}
-
-export interface StandardField {
-  icon: any;
-  name: string;
-}
-
-export const fieldAgents: FieldAgent[] = [
+export const fieldAgents = [
   { icon: IoDocumentOutline, name: "Analyze attachment", colour: "green" },
   {
     icon: HiOutlineBuildingOffice2,
@@ -64,7 +51,7 @@ export const fieldAgents: FieldAgent[] = [
   { icon: PiSquaresFourLight, name: "Browse catalog", colour: "slate" },
 ];
 
-export const standardFields: StandardField[] = [
+export const standardFields = [
   { icon: LuListEnd, name: "Link to another record" },
   { icon: FaA, name: "Single line text" },
   { icon: CiTextAlignLeft, name: "Long text" },

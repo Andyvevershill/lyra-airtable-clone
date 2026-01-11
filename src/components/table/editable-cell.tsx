@@ -2,21 +2,24 @@ import type { RowWithCells } from "@/types/row";
 import type { CellContext } from "@tanstack/react-table";
 import { useEffect, useRef, useState } from "react";
 
-interface EditableCellProps extends CellContext<any, any> {
+interface EditableCellProps<
+  TData extends { _rowId: string },
+  TValue,
+> extends CellContext<TData, TValue> {
   rows: RowWithCells[];
   columnId: string;
   onCellUpdate: (cellId: string, value: string | null) => void;
   dataType: string;
 }
 
-export default function EditableCell({
+export default function EditableCell<TData extends { _rowId: string }, TValue>({
   getValue,
   row,
   rows,
   columnId,
   onCellUpdate,
   dataType,
-}: EditableCellProps) {
+}: EditableCellProps<TData, TValue>) {
   const initialValue = (getValue() as string | null) ?? "";
   const [value, setValue] = useState(initialValue);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,8 +53,9 @@ export default function EditableCell({
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
+    } else if (!isEditing && cellRef.current) {
+      cellRef.current.focus();
     }
-    // REMOVED: auto-focus on cellRef - let table navigation handle it
   }, [isEditing]);
 
   const handleCellKeyDown = (e: React.KeyboardEvent) => {
@@ -118,7 +122,7 @@ export default function EditableCell({
           className="h-full w-full border-2 border-blue-500 bg-white px-3 text-[13px] outline-none"
         />
       ) : (
-        <div className="flex h-full w-full items-center truncate px-3 text-[13px]">
+        <div className="flex h-full w-full items-center px-3 text-[13px]">
           {value || "\u00A0"}
         </div>
       )}
