@@ -177,9 +177,10 @@ export function Table({
           const nextRowEl = tableRef.current?.querySelector(
             `tr[data-index="${nextRow}"]`,
           );
-          const nextCellDiv = nextRowEl?.children[nextCol]?.querySelector(
-            "div[tabindex]",
-          ) as HTMLElement;
+          const nextCellDiv =
+            nextRowEl?.children[nextCol]?.querySelector<HTMLElement>(
+              "div[tabindex]",
+            );
           nextCellDiv?.focus();
         }, 0);
       }
