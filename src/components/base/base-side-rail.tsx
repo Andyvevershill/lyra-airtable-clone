@@ -1,6 +1,6 @@
 "use client";
 
-import { AvatarLogOutDropdown } from "@/components/dashboard/avatar-log-out-dropdown";
+import { AvatarLogOutDropdown } from "@/components/dropdowns/avatar-log-out-dropdown";
 import { api } from "@/trpc/react";
 import type { User } from "@/types/users";
 import { ArrowLeft, Bell, Ellipsis, HelpCircle } from "lucide-react";

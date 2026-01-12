@@ -1,7 +1,7 @@
 "use client";
 
 import BaseContainer from "@/components/base/base-container";
-import DateRangeDropdownSelector from "@/components/dashboard/date-range-dropdown-selector";
+import DateRangeDropdownSelector from "@/components/dropdowns/date-range-dropdown-selector";
 import type { BaseWithTables } from "@/types/base";
 import { useState } from "react";
 import SelectView from "./select-view";

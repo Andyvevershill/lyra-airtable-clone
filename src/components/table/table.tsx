@@ -10,11 +10,11 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import AddRowButton from "../buttons/add-row-button";
-import { AddColumnDropdown } from "../dropdowns/add-column-menu";
 import {
   generateColumnDefinitions,
   transformRowsToTanStackFormat,
-} from "./generate-column-definitions";
+} from "../columns/generate-column-definitions";
+import { CreateColumnDropdown } from "../dropdowns/create-column-dropdown";
 
 interface Props {
   tableId: string;
@@ -298,7 +298,7 @@ export function Table({
             className="pointer absolute top-0 z-20 h-9.25 w-23.5 border-y border-r border-gray-200 bg-white p-0 hover:bg-gray-50"
             style={{ left: tableWidth }}
           >
-            <AddColumnDropdown tableId={tableId} />
+            <CreateColumnDropdown tableId={tableId} />
           </div>
         </div>
       </div>

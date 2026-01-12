@@ -20,7 +20,7 @@ export const columnRouter = createTRPCRouter({
       z.object({
         tableId: z.string(),
         name: z.string(),
-        type: z.enum(["text", "number"]),
+        type: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
