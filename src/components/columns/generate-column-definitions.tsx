@@ -1,7 +1,7 @@
 import type { Column } from "@/types/column";
 import type { RowWithCells, TransformedRow } from "@/types/row";
 import type { ColumnDef } from "@tanstack/react-table";
-import EditableCell from "./editable-cell";
+import EditableCell from "../table/editable-cell";
 
 export function generateColumnDefinitions(
   dbColumns: Column[],

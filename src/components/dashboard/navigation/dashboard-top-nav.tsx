@@ -8,7 +8,7 @@ import { Bell, HelpCircle, Search } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LuLoaderPinwheel } from "react-icons/lu";
-import { AvatarLogOutDropdown } from "../avatar-log-out-dropdown";
+import { AvatarLogOutDropdown } from "../../dropdowns/avatar-log-out-dropdown";
 
 interface props {
   user: User;

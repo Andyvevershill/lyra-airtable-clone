@@ -99,7 +99,7 @@ export function TableTabDropdown({ base, activeTab, setTables }: Props) {
               {filteredTables.map((table) => (
                 <MenubarItem
                   key={table.id}
-                  className="flex cursor-pointer flex-row items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-gray-100"
+                  className="pointer flex flex-row items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-gray-100"
                   onClick={() => router.push(`/base/${base.id}/${table.id}`)}
                 >
                   <div className="w-4">

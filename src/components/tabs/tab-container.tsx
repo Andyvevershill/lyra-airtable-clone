@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, type CSSProperties } from "react";
 import { RiArrowDownSLine } from "react-icons/ri";
-import { TableTabDropdown } from "../table/table-tab-dropdown";
+import { TableTabDropdown } from "../dropdowns/table-tab-dropdown";
 import { AddTableButton } from "./add-table-button";
 
 interface Props {
