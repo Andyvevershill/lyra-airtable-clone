@@ -6,12 +6,12 @@ import EditableCell from "../table/editable-cell";
 
 export function generateColumnDefinitions(
   dbColumns: ColumnType[],
-  rows: RowWithCells[],
-  onCellUpdate: (cellId: string, value: string | null) => void,
+  onCellEdit: (cellId: string, columnId: string, value: string | null) => void,
 ): ColumnDef<TransformedRow>[] {
   return dbColumns.map((col) => ({
-    accessorKey: col.id,
-    size: 175,
+    id: col.id,
+    accessorFn: (row) => row._cells[col.id],
+
     meta: {
       label: col.name,
       dataType: col.type,
@@ -32,9 +32,8 @@ export function generateColumnDefinitions(
     cell: (props) => (
       <EditableCell
         {...props}
-        rows={rows}
         columnId={col.id}
-        onCellUpdate={onCellUpdate}
+        onCellUpdate={onCellEdit}
         dataType={col.type}
       />
     ),
@@ -48,11 +47,13 @@ export function transformRowsToTanStackFormat(
     const transformedRow: TransformedRow = {
       _rowId: row.id,
       _position: row.position,
+      _cells: {},
+      _cellMap: {},
     };
 
-    // Add each cell value using columnId as the key
     row.cells.forEach((cell) => {
-      transformedRow[cell.columnId] = cell.value;
+      transformedRow._cells[cell.columnId] = cell.value;
+      transformedRow._cellMap[cell.columnId] = cell.id;
     });
 
     return transformedRow;

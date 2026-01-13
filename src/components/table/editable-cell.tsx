@@ -1,50 +1,55 @@
-import type { RowWithCells } from "@/types/row";
+import type { TransformedRow } from "@/types/row";
 import type { CellContext } from "@tanstack/react-table";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
-interface EditableCellProps<
-  TData extends { _rowId: string },
-  TValue,
-> extends CellContext<TData, TValue> {
-  rows: RowWithCells[];
+interface Props extends CellContext<TransformedRow, unknown> {
   columnId: string;
-  onCellUpdate: (cellId: string, value: string | null) => void;
+  onCellUpdate: (rowId: string, columnId: string, value: string | null) => void;
   dataType: string;
 }
 
-export default function EditableCell<TData extends { _rowId: string }, TValue>({
+function EditableCell({
   getValue,
   row,
-  rows,
   columnId,
   onCellUpdate,
   dataType,
-}: EditableCellProps<TData, TValue>) {
-  const initialValue = (getValue() as string | null) ?? "";
-  const [value, setValue] = useState(initialValue);
+}: Props) {
+  const cellId = row.original._cellMap[columnId];
+
+  const initialValueRef = useRef<string | null>(
+    (getValue() as string | null) ?? "",
+  );
+
+  const [value, setValue] = useState<string | null>(initialValueRef.current);
   const [isEditing, setIsEditing] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const cellRef = useRef<HTMLDivElement>(null);
 
-  const originalRow = rows.find((r) => r.id === row.original._rowId);
-  const cell = originalRow?.cells.find((c) => c.columnId === columnId);
-
+  // Sync external updates (sorting, refetch, visibility changes)
   useEffect(() => {
     if (!isEditing) {
-      setValue(initialValue);
+      const next = (getValue() as string | null) ?? "";
+      initialValueRef.current = next;
+      setValue(next);
     }
-  }, [initialValue, isEditing]);
+  }, [getValue, isEditing]);
 
   const commit = () => {
-    const trimmed = value.trim() || null;
-    if (trimmed !== initialValue && cell) {
-      onCellUpdate(cell.id, trimmed);
+    if (!isEditing) return;
+
+    const trimmed = value?.trim() || null;
+
+    if (trimmed !== initialValueRef.current && cellId) {
+      onCellUpdate(row.original._rowId, columnId, trimmed);
+      initialValueRef.current = trimmed;
     }
+
     setIsEditing(false);
   };
 
   const cancel = () => {
-    setValue(initialValue);
+    setValue(initialValueRef.current);
     setIsEditing(false);
   };
 
@@ -55,67 +60,25 @@ export default function EditableCell<TData extends { _rowId: string }, TValue>({
     }
   }, [isEditing]);
 
-  const handleCellKeyDown = (e: React.KeyboardEvent) => {
-    if (isEditing) return;
-
-    // Enter or F2 -> edit
-    if (e.key === "Enter" || e.key === "F2") {
-      e.preventDefault();
-      setIsEditing(true);
-      return;
-    }
-
-    // Any printable character -> edit with that char
-    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      e.preventDefault();
-      setValue(e.key);
-      setIsEditing(true);
-      return;
-    }
-
-    // Arrow keys, Tab -> handled by parent table
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      commit();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      cancel();
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      commit();
-      // Let parent handle tab navigation
-      setTimeout(() => {
-        const event = new KeyboardEvent("keydown", {
-          key: "Tab",
-          bubbles: true,
-          cancelable: true,
-        });
-        cellRef.current?.dispatchEvent(event);
-      }, 0);
-    }
-  };
-
-  if (!cell) return null;
+  if (!cellId) return null;
 
   return (
     <div
-      ref={cellRef}
       tabIndex={0}
       className="h-full w-full outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-      onKeyDown={handleCellKeyDown}
       onDoubleClick={() => setIsEditing(true)}
     >
       {isEditing ? (
         <input
           ref={inputRef}
           type={dataType}
-          value={value}
+          value={value ?? ""}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleInputKeyDown}
           onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commit();
+            if (e.key === "Escape") cancel();
+          }}
           className="h-full w-full border-2 border-blue-500 bg-white px-3 text-[13px] outline-none"
         />
       ) : (
@@ -126,3 +89,12 @@ export default function EditableCell<TData extends { _rowId: string }, TValue>({
     </div>
   );
 }
+
+export default memo(
+  EditableCell,
+  (prev, next) =>
+    prev.row.original._rowId === next.row.original._rowId &&
+    prev.columnId === next.columnId &&
+    Object.is(prev.getValue(), next.getValue()) &&
+    prev.dataType === next.dataType,
+);
