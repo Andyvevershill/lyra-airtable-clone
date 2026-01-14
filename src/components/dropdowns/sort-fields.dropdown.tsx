@@ -10,9 +10,9 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import type { Column } from "@tanstack/react-table";
 import { HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { BiSortAlt2 } from "react-icons/bi";
 import { FaA } from "react-icons/fa6";
 import { HiMagnifyingGlass } from "react-icons/hi2";
-import { IoFilterOutline } from "react-icons/io5";
 import { PiHashStraightLight } from "react-icons/pi";
 import SortFieldsForm from "../forms/sort-fields-form";
 
@@ -57,11 +57,11 @@ export default function SortFieldsDropdown<TData>({
         <button
           className={`pointer flex h-7 flex-row items-center gap-1 rounded-xs border border-transparent p-2 text-[13px] ${
             currentlySortedColumns.length > 0
-              ? "bg-[#FFE0CC] text-gray-900 hover:border-2 hover:border-[#efd5c4]"
+              ? "bg-[#FFE0CC] text-gray-900 hover:border-2 hover:border-[#FFE0CC]"
               : "text-gray-500 hover:bg-gray-100"
           }`}
         >
-          <IoFilterOutline />
+          <BiSortAlt2 size={16} />
           {currentlySortedColumns.length === 0 ? (
             <span className="text-[13px]">Sort</span>
           ) : (

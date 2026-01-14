@@ -1,6 +1,5 @@
 "use client";
 
-import type { SortingState } from "@/app/base/[id]/[tableId]/page";
 import {
   generateColumnDefinitions,
   transformRowsToTanStackFormat,
@@ -10,6 +9,7 @@ import { TableToolbar } from "@/components/table/table-toolbar";
 import { useCellCommitter } from "@/hooks/use-cell-commiter";
 import type { RowWithCells, TransformedRow } from "@/types";
 import type { ColumnType } from "@/types/column";
+import type { SortingState } from "@/types/view";
 import {
   getCoreRowModel,
   useReactTable,
@@ -94,7 +94,6 @@ export default function TableContainer({
   }, [rowsWithCells]);
 
   const { commitCell } = useCellCommitter({
-    tableId,
     localRows,
     setLocalRows,
   });

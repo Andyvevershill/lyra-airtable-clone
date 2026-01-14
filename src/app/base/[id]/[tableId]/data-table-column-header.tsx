@@ -36,7 +36,7 @@ export function DataTableColumnHeader<TData, TValue>({
     <div
       onMouseEnter={() => setShowTrigger(true)}
       onMouseLeave={() => setShowTrigger(false)}
-      className="flex w-full items-center gap-1 overflow-hidden"
+      className="flex h-full w-37 items-center gap-1 overflow-hidden border-b-blue-400"
     >
       {/* LEFT SIDE (icon + title) */}
       <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
@@ -45,7 +45,6 @@ export function DataTableColumnHeader<TData, TValue>({
         {/* THIS is where truncate must live */}
         <span className="truncate">{title}</span>
       </div>
-
       <ColumnActionDropdown
         column={column}
         showTrigger={showTrigger}

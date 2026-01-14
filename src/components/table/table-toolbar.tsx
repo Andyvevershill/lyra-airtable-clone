@@ -11,7 +11,7 @@ import {
   TableCellsSplit,
 } from "lucide-react";
 import { CiMenuBurger, CiShare1 } from "react-icons/ci";
-import { IoFilterOutline } from "react-icons/io5";
+import FilterFieldsDropdown from "../dropdowns/filter-fields-dropdown";
 import HideFieldsDropdown from "../dropdowns/hide-fields-dropdown";
 import SortFieldsDropdown from "../dropdowns/sort-fields.dropdown";
 
@@ -47,15 +47,7 @@ export function TableToolbar({ table, sideBarState: [open, setOpen] }: Props) {
       <div className="flex items-center gap-2 text-gray-500">
         <HideFieldsDropdown columns={columns} />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="pointer gap-1 rounded-xs"
-          style={{ fontWeight: 350 }}
-        >
-          <IoFilterOutline />
-          <span className="text-[13px]">Filter</span>
-        </Button>
+        <FilterFieldsDropdown columns={columns} />
 
         <Button
           variant="ghost"

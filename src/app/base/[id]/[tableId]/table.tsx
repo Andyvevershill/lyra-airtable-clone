@@ -2,6 +2,7 @@ import { useLoadingStore } from "@/app/stores/use-loading-store";
 import AddRowButton from "@/components/buttons/add-row-button";
 import { CreateColumnDropdown } from "@/components/dropdowns/create-column-dropdown";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import type { ColumnType } from "@/types/column";
 import type { TransformedRow } from "@/types/row";
 import { flexRender, type Table } from "@tanstack/react-table";
@@ -99,14 +100,6 @@ export function Table({
       if (lastIndex >= prefetchThreshold) {
         if (lastFetchedIndex.current !== lastIndex) {
           lastFetchedIndex.current = lastIndex;
-          console.log(
-            "PREFETCH TRIGGERED → index:",
-            lastIndex,
-            "| loaded:",
-            transformedRows.length,
-            "| threshold was:",
-            prefetchThreshold,
-          );
           fetchNextPage();
         }
       }
@@ -211,18 +204,31 @@ export function Table({
     >
       <div ref={scrollRef} className="relative flex-1 overflow-auto">
         <div className="relative inline-block min-w-full pr-16 align-top">
+          <div className="pointer-events-none sticky top-0 z-40">
+            <div
+              className="pointer-events-auto absolute top-0 flex h-9 w-23.5 items-center justify-center border-b border-l border-gray-200 bg-white shadow-[inset_0_-1px_0_0_rgb(229,231,235)] hover:bg-gray-50"
+              style={{ left: tableWidth }}
+            >
+              <CreateColumnDropdown tableId={tableId} />
+            </div>
+          </div>
+
           <table
             ref={tableRef}
             className="border-collapse bg-white"
             onKeyDown={handleTableKeyDown}
           >
-            <thead className="sticky top-0 z-10">
+            <thead className="sticky top-0 z-20 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="overflow-hidden border border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-normal text-gray-700 hover:bg-gray-50"
+                      className={cn(
+                        "relative overflow-hidden border-r border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-medium text-gray-700 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]",
+                        header.column.getIsSorted() &&
+                          "bg-[#FAF5F2] font-semibold",
+                      )}
                       style={{
                         minWidth: MIN_COL_WIDTH,
                         width: header.getSize(),
@@ -252,11 +258,13 @@ export function Table({
               }}
             >
               {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                // Correct: use the TanStack row model, not the raw data
-                const tanstackRow = table.getRowModel().rows[virtualRow.index];
+                const rows = table.getRowModel().rows;
+                const tanstackRow = rows[virtualRow.index];
 
-                if (!tanstackRow) {
-                  // Skeleton when row is not loaded (unloaded page)
+                const isBeyondLoadedRows = virtualRow.index >= rows.length;
+
+                // 1️⃣ Unloaded page → skeleton
+                if (!tanstackRow && isBeyondLoadedRows) {
                   const visibleColumns = table.getVisibleFlatColumns();
 
                   return (
@@ -273,7 +281,7 @@ export function Table({
                       {visibleColumns.map((column) => (
                         <td
                           key={column.id}
-                          className="h-full w-full overflow-hidden border border-gray-200"
+                          className="h-full w-full overflow-hidden border border-gray-200 p-0"
                           style={{
                             minWidth: MIN_COL_WIDTH,
                             width: column.getSize(),
@@ -290,7 +298,12 @@ export function Table({
                   );
                 }
 
-                // Real row: use the TanStack row model
+                // 2️⃣ Optimistic gap or invalid index → render nothing
+                if (!tanstackRow) {
+                  return null;
+                }
+
+                // 3️⃣ Real row (TS now knows tanstackRow is defined)
                 return (
                   <tr
                     key={tanstackRow.id}
@@ -306,7 +319,11 @@ export function Table({
                     {tanstackRow.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="overflow-hidden border border-gray-200 p-0"
+                        className={cn(
+                          "overflow-hidden border border-gray-200 p-0 transition-colors",
+                          cell.column.getIsSorted() &&
+                            "bg-[#FFF2EA] dark:bg-sky-950/30",
+                        )}
                         style={{
                           minWidth: MIN_COL_WIDTH,
                           width: cell.column.getSize(),
@@ -339,13 +356,6 @@ export function Table({
               </tr>
             </tfoot>
           </table>
-
-          <div
-            className="pointer absolute top-0 z-20 h-9.25 w-23.5 border-y border-r border-gray-200 bg-white p-0 hover:bg-gray-50"
-            style={{ left: tableWidth }}
-          >
-            <CreateColumnDropdown tableId={tableId} />
-          </div>
         </div>
       </div>
 

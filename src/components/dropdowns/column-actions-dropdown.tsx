@@ -33,7 +33,7 @@ export default function ColumnActionDropdown<TData, TValue>({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          "pointer flex flex-shrink-0 items-center justify-center hover:bg-transparent",
+          "pointer flex flex-shrink-0 items-center justify-center truncate hover:bg-transparent",
           showTrigger ? "opacity-100" : "opacity-0",
         )}
       >
