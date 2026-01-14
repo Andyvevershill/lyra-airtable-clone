@@ -3,15 +3,11 @@
 import { useLoadingStore } from "@/app/stores/use-loading-store";
 import NoDataPage from "@/components/no-data-page";
 import { api } from "@/trpc/react";
+import type { SortingState } from "@/types/view";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import TableContainer from "./table-container";
-
-export type SortingState = {
-  columnId: string;
-  direction: "asc" | "desc";
-  type: "string" | "number";
-} | null;
 
 export default function TablePage() {
   const { tableId } = useParams<{ tableId: string }>();
@@ -36,12 +32,12 @@ export default function TablePage() {
   } = api.row.getRowsInfinite.useInfiniteQuery(
     {
       tableId,
-      limit: 250,
-      sort: sorting ?? undefined,
+      limit: 5000,
+      sorting: sorting ? [sorting] : [],
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      placeholderData: (previousData) => previousData,
+      placeholderData: keepPreviousData,
     },
   );
 

@@ -74,7 +74,15 @@ export function useOptimisticCellUpdate({
     columnId: string,
     value: string | null,
   ) => {
-    // 1. Instant local UI update — this is what user sees instantly
+    const row = localRows.find((r) => r._rowId === rowId);
+    const cellId = row?._cellMap[columnId];
+
+    if (!cellId) {
+      console.warn("Missing cellId for", rowId, columnId);
+      return;
+    }
+
+    // 1. Optimistic UI update
     setLocalRows((prev) =>
       prev.map((row) =>
         row._rowId === rowId
@@ -86,16 +94,7 @@ export function useOptimisticCellUpdate({
       ),
     );
 
-    // 2. Find cell id
-    const row = localRows.find((r) => r._rowId === rowId);
-    const cellId = row?._cellMap[columnId];
-
-    if (!cellId) {
-      console.warn("Missing cellId for", rowId, columnId);
-      return;
-    }
-
-    // 3. Fire mutation — cache will be updated only on success
+    // 2. Fire mutation
     updateCell.mutate({ cellId, value });
   };
 

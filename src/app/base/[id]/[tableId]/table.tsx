@@ -1,5 +1,8 @@
+import { useLoadingStore } from "@/app/stores/use-loading-store";
 import AddRowButton from "@/components/buttons/add-row-button";
 import { CreateColumnDropdown } from "@/components/dropdowns/create-column-dropdown";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import type { ColumnType } from "@/types/column";
 import type { TransformedRow } from "@/types/row";
 import { flexRender, type Table } from "@tanstack/react-table";
@@ -11,6 +14,20 @@ import {
   useRef,
   useState,
 } from "react";
+
+function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
+  func: T,
+  limit: number,
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
 
 interface Props {
   table: Table<TransformedRow>;
@@ -42,6 +59,14 @@ export function Table({
   const tableRef = useRef<HTMLTableElement>(null);
   const [tableWidth, setTableWidth] = useState(0);
 
+  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
+
+  const lastFetchedIndex = useRef<number>(-1);
+
+  useEffect(() => {
+    setIsLoading(isFetchingNextPage);
+  }, [isFetchingNextPage, setIsLoading]);
+
   useLayoutEffect(() => {
     if (!tableRef.current) return;
     const update = () => setTableWidth(tableRef.current!.offsetWidth);
@@ -52,43 +77,57 @@ export function Table({
   }, []);
 
   const rowVirtualizer = useVirtualizer({
-    count: transformedRows.length,
+    count: rowCount,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW_HEIGHT,
-    overscan: 30,
+    overscan: 80,
   });
 
-  const lastFetchedIndex = useRef<number>(-1);
-
+  // Prefetch logic on scroll
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
 
-    const virtualItems = rowVirtualizer.getVirtualItems();
-    if (virtualItems.length === 0) return;
+    const checkPrefetch = () => {
+      if (!hasNextPage || isFetchingNextPage) return;
 
-    const lastItem = virtualItems[virtualItems.length - 1];
+      const items = rowVirtualizer.getVirtualItems();
+      if (items.length < 5) return;
 
-    if (!lastItem) return;
+      const lastIndex = items[items.length - 1]?.index ?? 0;
+      const prefetchThreshold = transformedRows.length - 7500;
 
-    if (
-      lastItem.index >= transformedRows.length - 20 &&
-      lastItem.index !== lastFetchedIndex.current
-    ) {
-      lastFetchedIndex.current = lastItem.index;
-      fetchNextPage();
-    }
-  });
+      if (lastIndex >= prefetchThreshold) {
+        if (lastFetchedIndex.current !== lastIndex) {
+          lastFetchedIndex.current = lastIndex;
+          fetchNextPage();
+        }
+      }
+    };
+
+    checkPrefetch();
+
+    const throttledCheck = throttle(checkPrefetch, 150);
+    scrollElement.addEventListener("scroll", throttledCheck);
+
+    return () => {
+      scrollElement.removeEventListener("scroll", throttledCheck);
+    };
+  }, [
+    rowVirtualizer,
+    transformedRows.length,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   useEffect(() => {
     lastFetchedIndex.current = -1;
   }, [transformedRows.length]);
 
-  const { rows: tableRows } = table.getRowModel();
-
   const handleTableKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       const target = e.target as HTMLElement;
-
       if (target.tagName === "INPUT") return;
 
       const cell = target.closest("td");
@@ -165,18 +204,31 @@ export function Table({
     >
       <div ref={scrollRef} className="relative flex-1 overflow-auto">
         <div className="relative inline-block min-w-full pr-16 align-top">
+          <div className="pointer-events-none sticky top-0 z-40">
+            <div
+              className="pointer-events-auto absolute top-0 flex h-9 w-23.5 items-center justify-center border-b border-l border-gray-200 bg-white shadow-[inset_0_-1px_0_0_rgb(229,231,235)] hover:bg-gray-50"
+              style={{ left: tableWidth }}
+            >
+              <CreateColumnDropdown tableId={tableId} />
+            </div>
+          </div>
+
           <table
             ref={tableRef}
             className="border-collapse bg-white"
             onKeyDown={handleTableKeyDown}
           >
-            <thead className="class sticky top-0 z-10">
+            <thead className="sticky top-0 z-20 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="overflow-hidden border border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-normal text-gray-700 hover:bg-gray-50"
+                      className={cn(
+                        "relative overflow-hidden border-r border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-medium text-gray-700 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]",
+                        header.column.getIsSorted() &&
+                          "bg-[#FAF5F2] font-semibold",
+                      )}
                       style={{
                         minWidth: MIN_COL_WIDTH,
                         width: header.getSize(),
@@ -192,7 +244,7 @@ export function Table({
                         header.getContext(),
                       )}
 
-                      <div className="select-non absolute top-0 right-0 h-full w-1 touch-none" />
+                      <div className="absolute top-0 right-0 h-full w-1 touch-none select-none" />
                     </th>
                   ))}
                 </tr>
@@ -206,12 +258,55 @@ export function Table({
               }}
             >
               {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const row = tableRows[virtualRow.index];
-                if (!row) return null;
+                const rows = table.getRowModel().rows;
+                const tanstackRow = rows[virtualRow.index];
 
+                const isBeyondLoadedRows = virtualRow.index >= rows.length;
+
+                // 1️⃣ Unloaded page → skeleton
+                if (!tanstackRow && isBeyondLoadedRows) {
+                  const visibleColumns = table.getVisibleFlatColumns();
+
+                  return (
+                    <tr
+                      key={`skeleton-${virtualRow.index}`}
+                      data-index={virtualRow.index}
+                      className="w-full"
+                      style={{
+                        position: "absolute",
+                        transform: `translateY(${virtualRow.start}px)`,
+                        height: ROW_HEIGHT,
+                      }}
+                    >
+                      {visibleColumns.map((column) => (
+                        <td
+                          key={column.id}
+                          className="h-full w-full overflow-hidden border border-gray-200 p-0"
+                          style={{
+                            minWidth: MIN_COL_WIDTH,
+                            width: column.getSize(),
+                            height: ROW_HEIGHT,
+                            maxWidth: column.getSize(),
+                          }}
+                        >
+                          <div className="flex h-full w-full items-center justify-center">
+                            <Skeleton className="h-3 w-full max-w-[90%] rounded-sm p-0" />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                }
+
+                // 2️⃣ Optimistic gap or invalid index → render nothing
+                if (!tanstackRow) {
+                  return null;
+                }
+
+                // 3️⃣ Real row (TS now knows tanstackRow is defined)
                 return (
                   <tr
-                    key={row.id}
+                    key={tanstackRow.id}
                     ref={(node) => rowVirtualizer.measureElement(node)}
                     data-index={virtualRow.index}
                     className="w-full hover:bg-gray-50"
@@ -221,10 +316,14 @@ export function Table({
                       height: ROW_HEIGHT,
                     }}
                   >
-                    {row.getVisibleCells().map((cell) => (
+                    {tanstackRow.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="overflow-hidden border border-gray-200 p-0"
+                        className={cn(
+                          "overflow-hidden border border-gray-200 p-0 transition-colors",
+                          cell.column.getIsSorted() &&
+                            "bg-[#FFF2EA] dark:bg-sky-950/30",
+                        )}
                         style={{
                           minWidth: MIN_COL_WIDTH,
                           width: cell.column.getSize(),
@@ -257,13 +356,6 @@ export function Table({
               </tr>
             </tfoot>
           </table>
-
-          <div
-            className="pointer absolute top-0 z-20 h-9.25 w-23.5 border-y border-r border-gray-200 bg-white p-0 hover:bg-gray-50"
-            style={{ left: tableWidth }}
-          >
-            <CreateColumnDropdown tableId={tableId} />
-          </div>
         </div>
       </div>
 

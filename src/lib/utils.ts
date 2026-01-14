@@ -7,7 +7,19 @@ export function cn(...inputs: ClassValue[]) {
 
 export const DEFAULT_BASE_CONFIG = {
   name: "Untitled Base",
-  colours: ["#B91C1C", "#1D4ED8", "#6D28D9", "#15803D", "#1F2937"],
+  colours: [
+    "#B91C1C",
+    "#1D4ED8",
+    "#6D28D9",
+    "#15803D",
+    "#1F2937",
+    "#9A3412",
+    "#7C2D12",
+    "#0F766E",
+    "#065F46",
+    "#3730A3",
+    "#4A044E",
+  ],
   columns: [
     { name: "Name", position: 0 },
     { name: "Notes", position: 1 },
