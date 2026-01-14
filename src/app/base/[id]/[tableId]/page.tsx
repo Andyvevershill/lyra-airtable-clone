@@ -3,6 +3,7 @@
 import { useLoadingStore } from "@/app/stores/use-loading-store";
 import NoDataPage from "@/components/no-data-page";
 import { api } from "@/trpc/react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import TableContainer from "./table-container";
@@ -36,12 +37,12 @@ export default function TablePage() {
   } = api.row.getRowsInfinite.useInfiniteQuery(
     {
       tableId,
-      limit: 250,
+      limit: 5000,
       sort: sorting ?? undefined,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      placeholderData: (previousData) => previousData,
+      placeholderData: keepPreviousData,
     },
   );
 

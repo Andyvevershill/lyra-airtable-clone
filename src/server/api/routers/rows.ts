@@ -31,7 +31,7 @@ export const rowsRouter = createTRPCRouter({
     .input(
       z.object({
         tableId: z.string(),
-        limit: z.number().min(1).max(500).default(300),
+        limit: z.number().min(1).max(5000).default(2500),
         cursor: z.number().nullish(),
         sort: z
           .object({
@@ -73,7 +73,7 @@ export const rowsRouter = createTRPCRouter({
             sort.direction === "desc"
               ? desc(cellValueSubquery!)
               : asc(cellValueSubquery!),
-            asc(rows.position), // stable fallback
+            asc(rows.position),
           ]
         : [asc(rows.position)];
 

@@ -7,7 +7,7 @@ import {
 } from "@/components/columns/generate-column-definitions";
 import { TableSidebar } from "@/components/table/table-sidebar";
 import { TableToolbar } from "@/components/table/table-toolbar";
-import { useOptimisticCellUpdate } from "@/hooks/use-optimistic-cell-update";
+import { useCellCommitter } from "@/hooks/use-cell-commiter";
 import type { RowWithCells, TransformedRow } from "@/types";
 import type { ColumnType } from "@/types/column";
 import {
@@ -93,15 +93,15 @@ export default function TableContainer({
     }
   }, [rowsWithCells]);
 
-  const { onCellUpdate } = useOptimisticCellUpdate({
+  const { commitCell } = useCellCommitter({
     tableId,
     localRows,
     setLocalRows,
   });
 
   const tanstackColumns = useMemo(
-    () => generateColumnDefinitions(localColumns, onCellUpdate),
-    [localColumns, onCellUpdate],
+    () => generateColumnDefinitions(localColumns, commitCell),
+    [localColumns, commitCell],
   );
 
   const table = useReactTable({
