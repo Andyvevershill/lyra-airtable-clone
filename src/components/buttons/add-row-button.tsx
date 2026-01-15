@@ -4,62 +4,84 @@ import { AiOutlinePlus } from "react-icons/ai";
 
 interface Props {
   tableId: string;
+  sorting?: any; // ✅ Add sorting prop (match the type from your table page)
 }
 
-export default function AddRowButton({ tableId }: Props) {
+export default function AddRowButton({ tableId, sorting }: Props) {
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
   const utils = api.useUtils();
 
   const addRow = api.row.addRow.useMutation({
     onMutate: async () => {
+      const traceId = `add-row-${Date.now()}`;
+      console.log(`🟢 [${traceId}] Starting optimistic row add`);
+
       setIsLoading(true);
 
-      void utils.row.getRowsInfinite.cancel({ tableId });
-
-      const previousData = utils.row.getRowsInfinite.getInfiniteData({
+      // ✅ Include sorting in the query key
+      const queryKey = {
         tableId,
-        limit: 250,
+        limit: 5000,
+        sorting: sorting ? [sorting] : [],
+      };
+
+      console.log(`📋 [${traceId}] Query key:`, queryKey);
+
+      await utils.row.getRowsInfinite.cancel(queryKey);
+
+      const previousData = utils.row.getRowsInfinite.getInfiniteData(queryKey);
+
+      console.log(`📊 [${traceId}] Previous data:`, {
+        hasData: !!previousData,
+        pageCount: previousData?.pages?.length,
+        firstPageItems: previousData?.pages?.[0]?.items?.length,
       });
 
-      utils.row.getRowsInfinite.setInfiniteData(
-        { tableId, limit: 250 },
-        (old) => {
-          if (!old) return old;
+      utils.row.getRowsInfinite.setInfiniteData(queryKey, (old) => {
+        if (!old) {
+          console.warn(`⚠️ [${traceId}] No old data found!`);
+          return old;
+        }
 
-          const tempRowId = `temp-${Date.now()}`;
+        const tempRowId = `temp-${Date.now()}`;
 
-          const newRow = {
-            id: tempRowId,
-            tableId,
-            position: old.pages[0]?.items.length ?? 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            cells: [],
-          };
+        const newRow = {
+          id: tempRowId,
+          tableId,
+          position: old.pages[0]?.items.length ?? 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cells: [],
+        };
 
-          return {
-            ...old,
-            pages: old.pages.map((page, index) =>
-              index === 0 ? { ...page, items: [...page.items, newRow] } : page,
-            ),
-          };
-        },
-      );
+        console.log(
+          `✅ [${traceId}] Adding row at position ${newRow.position}`,
+        );
 
-      return { previousData };
+        return {
+          ...old,
+          pages: old.pages.map((page, index) =>
+            index === 0 ? { ...page, items: [...page.items, newRow] } : page,
+          ),
+        };
+      });
+
+      return { previousData, traceId, queryKey };
     },
 
     onError: (err, _variables, context) => {
-      if (context?.previousData) {
+      console.error(`❌ [${context?.traceId}] Failed:`, err);
+
+      if (context?.previousData && context?.queryKey) {
         utils.row.getRowsInfinite.setInfiniteData(
-          { tableId, limit: 250 },
+          context.queryKey,
           context.previousData,
         );
       }
-      console.error("Failed to add row:", err);
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, _variables, context) => {
+      console.log(`🎉 [${context?.traceId}] Success - invalidating`);
       void utils.row.getRowsInfinite.invalidate({ tableId });
       void utils.row.getRowCount.invalidate({ tableId });
     },
@@ -69,15 +91,11 @@ export default function AddRowButton({ tableId }: Props) {
     },
   });
 
-  const handleAddRow = () => {
-    addRow.mutate({ tableId });
-  };
-
   return (
     <button
       className="pointer flex h-full w-full items-center justify-start pl-2 hover:bg-gray-50"
       title="Add row"
-      onClick={handleAddRow}
+      onClick={() => addRow.mutate({ tableId })}
       disabled={addRow.isPending}
     >
       <AiOutlinePlus size={16} className="text-gray-600" />
