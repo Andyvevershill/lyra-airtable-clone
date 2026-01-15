@@ -78,7 +78,7 @@ export function TableSidebar({ tableWithViews, sidebarOpen }: Props) {
                   e.stopPropagation();
                   setEditViewId(view.id);
                 }}
-                className={`pointer flex h-9 w-full items-center gap-2 rounded bg-gray-100 px-2 text-[13px] ${
+                className={`pointer flex h-9 w-full items-center gap-2 rounded px-2 text-[13px] ${
                   view.isFavourite ? "bg-gray-100" : ""
                 }`}
               >
