@@ -16,7 +16,6 @@ export function useCellCommitter({ localRows, setLocalRows }: Params) {
     onMutate: () => {
       setIsSaving(true);
     },
-    onError: () => {},
     onSettled: () => {
       setIsSaving(false);
     },

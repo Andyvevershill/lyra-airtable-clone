@@ -37,6 +37,7 @@ export default function SortFieldsForm({
   onApply,
 }: Props) {
   const [search, setSearch] = useState("");
+
   const [sortRules, setSortRules] = useState<SortRule[]>(() => {
     if (!columns || columns.length === 0) return [];
 
@@ -292,7 +293,12 @@ export default function SortFieldsForm({
 
       <div className="flex w-full justify-between border-t border-gray-200 bg-gray-100 p-2">
         <div className="ml-1 flex items-center gap-2">
-          <Toggle checked={false} onChange={() => {}} />
+          <Toggle
+            checked={false}
+            onChange={() => {
+              console.log("hello");
+            }}
+          />
           <p className="text-[13px]">Automatically sort records</p>
         </div>
 
