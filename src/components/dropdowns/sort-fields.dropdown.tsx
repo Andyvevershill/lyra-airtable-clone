@@ -57,7 +57,7 @@ export default function SortFieldsDropdown<TData>({
         <button
           className={`pointer flex h-7 flex-row items-center gap-1 rounded-xs border border-transparent p-2 text-[13px] ${
             currentlySortedColumns.length > 0
-              ? "bg-[#FFE0CC] text-gray-900 hover:border-2 hover:border-[#FFE0CC]"
+              ? "bg-[#FFE0CC] text-gray-900 hover:border-2 hover:border-[#FFCCAA]"
               : "text-gray-500 hover:bg-gray-100"
           }`}
         >

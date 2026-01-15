@@ -13,6 +13,7 @@ export default function AddRowButton({ tableId }: Props) {
   const addRow = api.row.addRow.useMutation({
     onMutate: async () => {
       setIsLoading(true);
+
       await utils.row.getRowsInfinite.cancel({ tableId });
 
       const previousData = utils.row.getRowsInfinite.getInfiniteData({
@@ -26,13 +27,14 @@ export default function AddRowButton({ tableId }: Props) {
           if (!old) return old;
 
           const tempRowId = `temp-${Date.now()}`;
+
           const newRow = {
             id: tempRowId,
             tableId,
             position: old.pages[0]?.items.length ?? 0,
             createdAt: new Date(),
             updatedAt: new Date(),
-            cells: [],
+            cells: [], // ✅ sparse: no cells created
           };
 
           return {
@@ -46,7 +48,8 @@ export default function AddRowButton({ tableId }: Props) {
 
       return { previousData };
     },
-    onError: (err, variables, context) => {
+
+    onError: (err, _variables, context) => {
       if (context?.previousData) {
         utils.row.getRowsInfinite.setInfiniteData(
           { tableId, limit: 250 },
@@ -56,9 +59,14 @@ export default function AddRowButton({ tableId }: Props) {
 
       console.error("Failed to add row:", err);
     },
+
     onSuccess: () => {
       void utils.row.getRowsInfinite.invalidate({ tableId });
       void utils.row.getRowCount.invalidate({ tableId });
+    },
+
+    onSettled: () => {
+      // ✅ always clear loading state
       setIsLoading(false);
     },
   });
