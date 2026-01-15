@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { TransformedRow } from "@/types";
 import type { Column, ColumnFiltersState } from "@tanstack/react-table";
 import { HelpCircle } from "lucide-react";
 import { useState } from "react";
@@ -19,11 +20,11 @@ interface FilterRule {
   id: string;
   fieldId: string | null;
   operator: string | null;
-  value: any;
+  value: string | number | null;
 }
 
 interface Props {
-  columns: Column<any, unknown>[];
+  columns: Column<TransformedRow, unknown>[];
   currentFilters: ColumnFiltersState;
   onApply: (filters: ColumnFiltersState) => void;
   onClose: () => void;
@@ -48,19 +49,30 @@ export default function FilterFieldsForm({
     }
 
     return currentFilters.map((f) => {
-      const raw = f.value as any;
+      const raw = f.value as
+        | { operator?: string; value?: string | number }
+        | string
+        | number
+        | null;
+
+      let operator: string | null = null;
+      let value: string | number | null = null;
+
+      if (raw && typeof raw === "object" && "operator" in raw) {
+        // It's a structured filter object
+        operator = typeof raw.operator === "string" ? raw.operator : null;
+        value = raw.value ?? null;
+      } else if (typeof raw === "string" || typeof raw === "number") {
+        // It's a direct primitive value
+        value = raw;
+      }
+      // else raw is null, so value stays null
 
       return {
         id: crypto.randomUUID(),
         fieldId: f.id,
-        operator:
-          raw && typeof raw === "object" && "operator" in raw
-            ? raw.operator
-            : null,
-        value:
-          raw && typeof raw === "object" && "value" in raw
-            ? raw.value
-            : (raw ?? null),
+        operator,
+        value,
       };
     });
   });
@@ -91,8 +103,10 @@ export default function FilterFieldsForm({
     }
   };
 
-  const shouldDisableInput = (operator: string | null) =>
-    operator === "isEmpty" || operator === "isNotEmpty";
+  function shouldDisableInput(operator: string | null) {
+    if (operator === "isEmpty" || operator === "isNotEmpty") return true;
+    else return false;
+  }
 
   const getInputType = (fieldId: string | null) => {
     const column = columns.find((c) => c.id === fieldId);
