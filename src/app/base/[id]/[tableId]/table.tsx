@@ -2,18 +2,13 @@ import { useLoadingStore } from "@/app/stores/use-loading-store";
 import AddRowButton from "@/components/buttons/add-row-button";
 import { CreateColumnDropdown } from "@/components/dropdowns/create-column-dropdown";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTableKeyboardNavigation } from "@/hooks/use-table-keyboard-nav";
 import { cn } from "@/lib/utils";
 import type { ColumnType } from "@/types/column";
 import type { TransformedRow } from "@/types/row";
 import { flexRender, type Table } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
   func: T,
@@ -67,6 +62,7 @@ export function Table({
     setIsLoading(isFetchingNextPage);
   }, [isFetchingNextPage, setIsLoading]);
 
+  // for sticking the add col buttion to the side of the table
   useLayoutEffect(() => {
     if (!tableRef.current) return;
     const update = () => setTableWidth(tableRef.current!.offsetWidth);
@@ -76,8 +72,11 @@ export function Table({
     return () => observer.disconnect();
   }, []);
 
+  const isFiltering = table.getState().columnFilters.length > 0;
+  const effectiveRowCount = isFiltering ? transformedRows.length : rowCount;
+
   const rowVirtualizer = useVirtualizer({
-    count: rowCount,
+    count: effectiveRowCount,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 80,
@@ -125,77 +124,11 @@ export function Table({
     lastFetchedIndex.current = -1;
   }, [transformedRows.length]);
 
-  const handleTableKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT") return;
-
-      const cell = target.closest("td");
-      if (!cell) return;
-
-      const row = cell.closest("tr");
-      if (!row) return;
-
-      const rowIndex = parseInt(row.getAttribute("data-index") ?? "0");
-      const colIndex = Array.from(row.children).indexOf(cell);
-
-      const totalRows = transformedRows.length;
-      const totalCols = columns.length;
-
-      let nextRow = rowIndex;
-      let nextCol = colIndex;
-      let shouldNavigate = false;
-
-      switch (e.key) {
-        case "ArrowUp":
-          e.preventDefault();
-          nextRow = Math.max(0, rowIndex - 1);
-          shouldNavigate = true;
-          break;
-        case "ArrowDown":
-          e.preventDefault();
-          nextRow = Math.min(totalRows - 1, rowIndex + 1);
-          shouldNavigate = true;
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          nextCol = Math.max(0, colIndex - 1);
-          shouldNavigate = true;
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          nextCol = Math.min(totalCols - 1, colIndex + 1);
-          shouldNavigate = true;
-          break;
-        case "Tab":
-          e.preventDefault();
-          nextCol = colIndex + (e.shiftKey ? -1 : 1);
-          if (nextCol >= totalCols) {
-            nextCol = 0;
-            nextRow = Math.min(totalRows - 1, rowIndex + 1);
-          } else if (nextCol < 0) {
-            nextCol = totalCols - 1;
-            nextRow = Math.max(0, rowIndex - 1);
-          }
-          shouldNavigate = true;
-          break;
-      }
-
-      if (shouldNavigate) {
-        setTimeout(() => {
-          const nextRowEl = tableRef.current?.querySelector(
-            `tr[data-index="${nextRow}"]`,
-          );
-          const nextCellDiv =
-            nextRowEl?.children[nextCol]?.querySelector<HTMLElement>(
-              "div[tabindex]",
-            );
-          nextCellDiv?.focus();
-        }, 0);
-      }
-    },
-    [transformedRows.length, columns.length],
-  );
+  const { handleTableKeyDown } = useTableKeyboardNavigation({
+    tableRef,
+    totalRows: transformedRows.length,
+    totalCols: columns.length,
+  });
 
   return (
     <div
@@ -225,8 +158,12 @@ export function Table({
                     <th
                       key={header.id}
                       className={cn(
-                        "relative overflow-hidden border-r border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-medium text-gray-700 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]",
+                        "relative overflow-hidden border-r border-gray-200 bg-white px-3 py-2 text-left text-[13px] font-medium text-gray-700 shadow-[inset_0_-1px_0_0_rgb(229,231,235)] hover:bg-gray-50",
+
+                        header.column.getIsFiltered() &&
+                          "bg-[#F6FBF7] font-semibold",
                         header.column.getIsSorted() &&
+                          !header.column.getIsFiltered() &&
                           "bg-[#FAF5F2] font-semibold",
                       )}
                       style={{
@@ -263,8 +200,7 @@ export function Table({
 
                 const isBeyondLoadedRows = virtualRow.index >= rows.length;
 
-                // 1️⃣ Unloaded page → skeleton
-                if (!tanstackRow && isBeyondLoadedRows) {
+                if (!tanstackRow && isBeyondLoadedRows && isFetchingNextPage) {
                   const visibleColumns = table.getVisibleFlatColumns();
 
                   return (
@@ -321,8 +257,10 @@ export function Table({
                         key={cell.id}
                         className={cn(
                           "overflow-hidden border border-gray-200 p-0 transition-colors",
+                          cell.column.getIsFiltered() && "bg-[#ebfbec]",
                           cell.column.getIsSorted() &&
-                            "bg-[#FFF2EA] dark:bg-sky-950/30",
+                            !cell.column.getIsFiltered() &&
+                            "bg-[#FFF2EA]",
                         )}
                         style={{
                           minWidth: MIN_COL_WIDTH,
@@ -359,7 +297,8 @@ export function Table({
         </div>
       </div>
 
-      <div className="border-t border-gray-300 bg-white px-3 py-2">
+      {/* records bar */}
+      <div className="sticky bottom-0 z-20 w-full border-t border-gray-300 bg-white px-3 py-2">
         <div className="text-xs text-gray-600">
           {rowCount} {rowCount === 1 ? "record" : "records"}
           {isFetchingNextPage && " – Loading more…"}

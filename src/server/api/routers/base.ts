@@ -1,6 +1,13 @@
 import { DEFAULT_BASE_CONFIG, getRandomColour } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { bases, cells, columns, rows, tables } from "@/server/db/schemas/bases";
+import {
+  bases,
+  cells,
+  columns,
+  rows,
+  tables,
+  views,
+} from "@/server/db/schemas/bases";
 import { faker } from "@faker-js/faker";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -32,6 +39,11 @@ export const baseRouter = createTRPCRouter({
 
       if (!table) throw new Error("Failed to create base");
 
+      // create a default view
+      await tx
+        .insert(views)
+        .values({ tableId: table.id, name: "Grid view", isActive: true });
+
       // 3. Create the columns
       const createdColumns = await tx
         .insert(columns)
@@ -45,12 +57,11 @@ export const baseRouter = createTRPCRouter({
         )
         .returning();
 
-      // 4. Create the rows
+      // 4. Create the rows (position will auto-increment via serial)
       const rowValues = Array.from(
         { length: DEFAULT_BASE_CONFIG.defaultRowCount },
-        (_, i) => ({
+        () => ({
           tableId: table.id,
-          position: i,
         }),
       );
 

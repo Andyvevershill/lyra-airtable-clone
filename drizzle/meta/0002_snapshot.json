@@ -1,6 +1,6 @@
 {
-  "id": "ae20bfce-31f0-41b5-80a9-efc1151b2e5d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "3de95c6b-33c2-4c5d-9cd7-51235ba13c41",
+  "prevId": "742978d3-0eee-42be-a99b-6828b3b6d8c2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -368,7 +368,7 @@
         },
         "position": {
           "name": "position",
-          "type": "bigint",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "identity": {
@@ -378,7 +378,7 @@
             "increment": "1",
             "startWith": "1",
             "minValue": "1",
-            "maxValue": "9223372036854775807",
+            "maxValue": "2147483647",
             "cache": "1",
             "cycle": false
           }
@@ -589,6 +589,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "filters": {
           "name": "filters",
           "type": "json",
@@ -626,6 +633,22 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "view_active_unique_idx": {
+          "name": "view_active_unique_idx",
+          "columns": [
+            {
+              "expression": "table_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_active = true",
           "concurrently": false,
           "method": "btree",
           "with": {}
