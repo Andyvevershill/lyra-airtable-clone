@@ -55,7 +55,6 @@ export function translateFiltersState(
 }
 
 // trnsform BE view data to table readable data
-
 export function applyViewToTableState(
   activeView:
     | {
@@ -83,7 +82,6 @@ export function applyViewToTableState(
     callbacks.onSortingChange([]);
     callbacks.onColumnFiltersChange([]);
     callbacks.onColumnVisibilityChange({});
-
     return;
   }
 
@@ -103,15 +101,17 @@ export function applyViewToTableState(
       value: {
         operator: filter.operator,
         value: filter.value,
-      } as unknown,
+      },
     })) ?? [];
 
   callbacks.onColumnFiltersChange(filtersState);
 
-  // Visibility (hidden columns)
-  const visibilityState: VisibilityState = Object.fromEntries(
-    (activeView.hidden ?? []).map((colId) => [colId, false]),
-  );
+  // Visibility (hidden columns) — NO Object.fromEntries (avoids `any`)
+  const visibilityState: VisibilityState = {};
+
+  for (const colId of activeView.hidden ?? []) {
+    visibilityState[colId] = false;
+  }
 
   callbacks.onColumnVisibilityChange(visibilityState);
 }
