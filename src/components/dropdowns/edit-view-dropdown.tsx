@@ -149,7 +149,8 @@ export function EditViewDropdown({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="right">
-                You can't delete the only remaining view
+                You can&apos;t delete a view when it&apos; the only grid view
+                left in the table
               </TooltipContent>
             </Tooltip>
           ) : (

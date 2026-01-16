@@ -48,7 +48,9 @@ export function CreateSearchForm() {
             onChange={(e) => setsearchQuery(e.target.value)}
             onBlur={handleSearch}
             onKeyDown={(e) => {
-              e.key === "Enter" && handleSearch();
+              if (e.key === "Enter") {
+                handleSearch();
+              }
             }}
             placeholder="Find in view..."
             className="h-full w-full border-none bg-transparent p-2 ring-0 outline-none focus:border-none focus:ring-0 focus:outline-none"

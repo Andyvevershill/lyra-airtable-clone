@@ -3,6 +3,7 @@ import {
   translateSortingState,
 } from "@/lib/helper-functions";
 import { api } from "@/trpc/react";
+import type { ColumnType } from "@/types";
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -11,7 +12,7 @@ interface Props {
   tableId: string;
   sorting: SortingState;
   filters: ColumnFiltersState;
-  columns: any[];
+  columns: ColumnType[];
 }
 
 function AddRowButton({ tableId, sorting, filters, columns }: Props) {
