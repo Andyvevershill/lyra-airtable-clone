@@ -100,7 +100,7 @@ export function applyViewToTableState(
       id: filter.columnId,
       value: {
         operator: filter.operator,
-        value: filter.value,
+        value: filter.value as unknown,
       },
     })) ?? [];
 
