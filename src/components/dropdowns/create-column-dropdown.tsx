@@ -106,7 +106,6 @@ export function CreateColumnDropdown({ tableId }: Props) {
                       size={18}
                     />
                     <Input
-                      autoFocus
                       type="text"
                       value={searchQuery}
                       onKeyDown={(e) => e.stopPropagation()}

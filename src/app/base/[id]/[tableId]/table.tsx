@@ -268,32 +268,38 @@ export function Table({
                       height: ROW_HEIGHT,
                     }}
                   >
-                    {tanstackRow.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className={cn(
-                          "overflow-hidden border border-gray-200 p-0 transition-colors",
-                          cell.column.getIsFiltered() && "bg-[#ebfbec]",
-                          cell.column.getIsSorted() &&
-                            !cell.column.getIsFiltered() &&
-                            "bg-[#FFF2EA]",
-                        )}
-                        style={{
-                          minWidth: MIN_COL_WIDTH,
-                          width: cell.column.getSize(),
-                          height: ROW_HEIGHT,
-                          maxWidth: cell.column.getSize(),
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    ))}
+                    {tanstackRow.getVisibleCells().map((cell) => {
+                      return (
+                        <td
+                          key={cell.id}
+                          className={cn(
+                            "overflow-hidden border border-gray-200 p-0 transition-colors",
+
+                            // existing states
+                            cell.column.getIsFiltered() && "bg-[#ebfbec]",
+                            cell.column.getIsSorted() &&
+                              !cell.column.getIsFiltered() &&
+                              "bg-[#FFF2EA]",
+
+                            // 🔥 global search match (cell-level)
+                          )}
+                          style={{
+                            minWidth: MIN_COL_WIDTH,
+                            width: cell.column.getSize(),
+                            height: ROW_HEIGHT,
+                            maxWidth: cell.column.getSize(),
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}

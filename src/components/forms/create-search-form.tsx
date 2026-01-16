@@ -1,6 +1,5 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
 import { useGlobalSearchStore } from "@/app/stores/use-search-store";
 import {
   DropdownMenuContent,
@@ -14,12 +13,12 @@ import { DropdownMenu } from "../ui/dropdown-menu";
 
 export function CreateSearchForm() {
   const { setGlobalSearch } = useGlobalSearchStore();
-  const { setIsLoading } = useLoadingStore();
+  // const { setIsLoading } = useLoadingStore();
   const [searchQuery, setsearchQuery] = useState("");
   const [open, setOpen] = useState(false);
 
   function handleSearch() {
-    setIsLoading(true);
+    // setIsLoading(true);
     setGlobalSearch(searchQuery);
   }
 
