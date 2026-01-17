@@ -8,7 +8,6 @@ const filterOperator = z.enum([
   // string fields
   "contains",
   "notContains",
-  // so like a search
   "equals",
   "isEmpty",
   "isNotEmpty",
@@ -56,14 +55,14 @@ export const viewInputSchema = z.object({
 
 export type ViewInput = z.infer<typeof viewInputSchema>;
 
-const globalSearchMatchesSchema = z.object({
-  columnIds: z.array(z.string()),
-  cells: z.array(
-    z.object({
-      rowId: z.string(),
-      cellId: z.string(),
-    }),
-  ),
-});
+export type SearchMatch =
+  | { type: "column"; columnId: string }
+  | {
+      type: "cell";
+      cellId: string;
+      rowIndex: number;
+    };
 
-export type GlobalSearchMatches = z.infer<typeof globalSearchMatchesSchema>;
+export type GlobalSearchMatches = {
+  matches: SearchMatch[];
+};

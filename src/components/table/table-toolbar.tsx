@@ -1,6 +1,6 @@
 "use client";
 
-import { useLoadingViewStore } from "@/app/stores/use-loading-view-store";
+import { useLoadingStore } from "@/app/stores/use-loading-store";
 import { Button } from "@/components/ui/button";
 import type { TransformedRow } from "@/types";
 import type { Table } from "@tanstack/react-table";
@@ -25,13 +25,13 @@ interface Props {
 }
 
 const items = [
-  { text: "Colour", icon: <PaintBucket /> },
-  { icon: <MdFormatLineSpacing /> },
-  { text: "Share and sync", icon: <CiShare1 /> },
+  { id: 1, text: "Colour", icon: <PaintBucket /> },
+  { id: 2, icon: <MdFormatLineSpacing /> },
+  { id: 3, text: "Share and sync", icon: <CiShare1 /> },
 ];
 
 export function TableToolbar({ table, sideBarState: [open, setOpen] }: Props) {
-  const { isLoadingView } = useLoadingViewStore();
+  const { isLoadingView } = useLoadingStore();
 
   return (
     <div className="flex h-[47px] items-center justify-between border-b border-gray-200 bg-white px-3">
@@ -57,7 +57,7 @@ export function TableToolbar({ table, sideBarState: [open, setOpen] }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-sm p-0 text-gray-500"
+            className="rounded-xs p-0 text-gray-500"
           >
             <Search />
           </Button>
@@ -71,7 +71,7 @@ export function TableToolbar({ table, sideBarState: [open, setOpen] }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="pointer gap-1 rounded-sm"
+            className="pointer gap-1 rounded-xs"
             style={{ fontWeight: 350 }}
           >
             <PanelsTopLeft />
@@ -82,9 +82,9 @@ export function TableToolbar({ table, sideBarState: [open, setOpen] }: Props) {
 
           {items.map((item) => (
             <Button
-              key={item.text}
+              key={item.id}
               variant="ghost"
-              className="pointer h-6.5 rounded-sm"
+              className="pointer h-6.5 rounded-xs"
               style={{ fontWeight: 450 }}
             >
               {item.icon}

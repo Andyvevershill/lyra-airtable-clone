@@ -42,8 +42,6 @@ function AddRowButton({ tableId, sorting, filters, columns }: Props) {
           id: tempRowId,
           tableId,
           position: old.pages[0]?.items.length ?? 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
           cells: [],
         };
 

@@ -1,11 +1,10 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { cells, columns, rows } from "@/server/db/schemas/bases";
-import { getRowsInfiniteInput } from "@/types/view";
+import { getRowsInfiniteInput, type SearchMatch } from "@/types/view";
 import { faker } from "@faker-js/faker";
 import {
   and,
   asc,
-  desc,
   eq,
   gt,
   ilike,
@@ -23,13 +22,6 @@ export const rowsRouter = createTRPCRouter({
   getRowsInfinite: protectedProcedure
     .input(getRowsInfiniteInput)
     .query(async ({ ctx, input }) => {
-      console.log("🔧 Backend received input:", {
-        tableId: input.tableId,
-        globalSearch: input.globalSearch,
-        filters: input.filters,
-        sorting: input.sorting,
-      });
-
       const offset = input.cursor ?? 0;
       const { sorting, filters, globalSearch } = input;
 
@@ -40,13 +32,14 @@ export const rowsRouter = createTRPCRouter({
         const cellValueSubquery =
           sort.type === "number"
             ? sql`CAST((SELECT value FROM cell WHERE row_id = row.id AND column_id = ${sort.columnId} LIMIT 1) AS NUMERIC)`
-            : sql`(SELECT value FROM cell WHERE row_id = row.id AND column_id = ${sort.columnId} LIMIT 1)`;
+            : sql`LOWER((SELECT value FROM cell WHERE row_id = row.id AND column_id = ${sort.columnId} LIMIT 1))`;
 
-        orderByClauses.push(
-          sort.direction === "desc"
-            ? desc(cellValueSubquery)
-            : asc(cellValueSubquery),
-        );
+        // Nulls last for both
+        if (sort.direction === "desc") {
+          orderByClauses.push(sql`${cellValueSubquery} DESC NULLS LAST`);
+        } else {
+          orderByClauses.push(sql`${cellValueSubquery} ASC NULLS LAST`);
+        }
       }
 
       orderByClauses.push(asc(rows.position));
@@ -96,26 +89,30 @@ export const rowsRouter = createTRPCRouter({
 
       const finalWhere = and(...whereConditions);
 
-      console.log(
-        "🎯 Executing query with",
-        whereConditions.length,
-        "conditions",
-      );
-
       // ── 3. Execute Query ──────────────────────────────────────────────────
       const tableRows = await ctx.db
-        .select()
+        .select({
+          id: rows.id,
+          tableId: rows.tableId,
+          position: rows.position,
+        })
         .from(rows)
         .where(finalWhere)
         .orderBy(...orderByClauses)
         .limit(input.limit)
         .offset(offset);
 
-      console.log("📊 Query returned", tableRows.length, "rows");
-
       const rowIds = tableRows.map((r) => r.id);
       const rowCells = rowIds.length
-        ? await ctx.db.select().from(cells).where(inArray(cells.rowId, rowIds))
+        ? await ctx.db
+            .select({
+              id: cells.id,
+              rowId: cells.rowId,
+              columnId: cells.columnId,
+              value: cells.value,
+            })
+            .from(cells)
+            .where(inArray(cells.rowId, rowIds))
         : [];
 
       const rowsWithCells = tableRows.map((row) => ({
@@ -124,47 +121,45 @@ export const rowsRouter = createTRPCRouter({
       }));
 
       // ── 4. Calculate Search Matches (if globalSearch exists) ─────────────
+
       const searchMatches: {
-        columnIds: string[];
-        cells: Array<{ rowId: string; cellId: string }>;
-      } = { columnIds: [], cells: [] };
+        matches: SearchMatch[];
+      } = { matches: [] };
 
       if (globalSearch?.trim()) {
-        console.log("🔍 Calculating search matches for:", globalSearch);
-
         const searchTerm = globalSearch.trim().toLowerCase();
 
-        // Get all columns for this table
+        // Column matches (first)
         const tableColumns = await ctx.db
           .select({ id: columns.id, name: columns.name })
           .from(columns)
           .where(eq(columns.tableId, input.tableId));
 
-        // Find matching column headers
-        const matchedColumnIds = tableColumns
-          .filter((col) => col.name.toLowerCase().includes(searchTerm))
-          .map((col) => col.id);
+        for (const col of tableColumns) {
+          if (col.name.toLowerCase().includes(searchTerm)) {
+            searchMatches.matches.push({
+              type: "column",
+              columnId: col.id,
+            });
+          }
+        }
 
-        // Find matching cell values (only from the filtered/sorted rows)
-        const matchedCells = rowCells
-          .filter((cell) =>
-            cell.value?.toString().toLowerCase().includes(searchTerm),
-          )
-          .map((cell) => ({
-            rowId: cell.rowId,
-            cellId: cell.id,
-          }));
+        // Cell matches - with row index
+        for (const cell of rowCells) {
+          if (cell.value?.toString().toLowerCase().includes(searchTerm)) {
+            // Find the index of this row in the tableRows array
+            const rowIndex = tableRows.findIndex(
+              (row) => row.id === cell.rowId,
+            );
 
-        searchMatches.columnIds = matchedColumnIds;
-        searchMatches.cells = matchedCells;
-
-        console.log("✅ Search matches:", {
-          columns: matchedColumnIds.length,
-          cells: matchedCells.length,
-        });
+            searchMatches.matches.push({
+              type: "cell",
+              cellId: `${cell.rowId}_${cell.columnId}`,
+              rowIndex: rowIndex !== -1 ? rowIndex : 0, // Include the row's position in the current page
+            });
+          }
+        }
       }
-
-      console.log("✅ Returning", rowsWithCells.length, "rows with cells");
 
       return {
         items: rowsWithCells,

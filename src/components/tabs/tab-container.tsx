@@ -6,6 +6,7 @@ import type { BaseWithTables } from "@/types/base";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, type CSSProperties } from "react";
+import { IoChevronDown } from "react-icons/io5";
 import { RiArrowDownSLine } from "react-icons/ri";
 import { TableTabDropdown } from "../dropdowns/table-tab-dropdown";
 import { AddTableButton } from "./add-table-button";
@@ -30,43 +31,53 @@ export default function TabContainer({ base }: Props) {
   };
 
   return (
-    <div className="flex h-9 w-full flex-row items-center" style={tabStyle}>
-      {tables.map((table) => {
-        const isActive = table.id === tableId;
+    <div
+      className="flex flex-row items-center justify-between"
+      style={tabStyle}
+    >
+      <div className="flex h-8 w-full flex-row items-center">
+        {tables.map((table) => {
+          const isActive = table.id === tableId;
 
-        return (
-          <Link
-            key={table.id}
-            href={`/base/${base.id}/${table.id}`}
-            onMouseEnter={() => {
-              if (!isActive) {
-                // preload the core data of chosen tab
-                void utils.table.getTableWithViews.prefetch({
-                  tableId: table.id,
-                });
-                void utils.column.getColumns.prefetch({
-                  tableId: table.id,
-                });
-              }
-            }}
-            className={`flex h-[36px] items-center gap-2 border-r px-4 py-1 text-[13px] transition-colors ${
-              isActive
-                ? "rounded-xs bg-white font-normal"
-                : "text-gray-600 hover:bg-[var(--tab-hover-darken)]"
-            }`}
-          >
-            {table.name}
-            {isActive && <RiArrowDownSLine size={16} />}
-          </Link>
-        );
-      })}
+          return (
+            <Link
+              key={table.id}
+              href={`/base/${base.id}/${table.id}`}
+              onMouseEnter={() => {
+                if (!isActive) {
+                  void utils.table.getTableWithViews.prefetch({
+                    tableId: table.id,
+                  });
+                  void utils.column.getColumns.prefetch({ tableId: table.id });
+                }
+              }}
+              className={`relative flex h-full items-center gap-2 rounded-t-sm px-4 py-1 text-[13px] transition-colors after:absolute after:top-1/2 after:right-0 after:h-1/3 after:w-px after:-translate-y-1/2 after:bg-[var(--tab-hover-darken)] ${
+                isActive
+                  ? "bg-white font-normal after:hidden"
+                  : "text-gray-500 hover:bg-[var(--tab-hover-darken)]"
+              }`}
+            >
+              {table.name}
+              {isActive && <RiArrowDownSLine size={16} />}
+            </Link>
+          );
+        })}
 
-      <TableTabDropdown base={base} activeTab={tableId} setTables={setTables} />
-      <AddTableButton
-        baseId={base.id}
-        tableNumber={base.tables.length + 1}
-        setTables={setTables}
-      />
+        <TableTabDropdown
+          base={base}
+          activeTab={tableId}
+          setTables={setTables}
+        />
+        <AddTableButton
+          baseId={base.id}
+          tableNumber={base.tables.length + 1}
+          setTables={setTables}
+        />
+      </div>
+      <div className="pointer mr-4 flex flex-row items-center justify-end gap-2 text-[13px] text-gray-600">
+        <p>Tools</p>
+        <IoChevronDown />
+      </div>
     </div>
   );
 }
