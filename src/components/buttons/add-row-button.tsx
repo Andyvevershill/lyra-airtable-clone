@@ -39,7 +39,7 @@ function AddRowButton({ tableId, sorting, filters, columns }: Props) {
   const queryKey = useMemo(
     () => ({
       tableId,
-      limit: 5000,
+      limit: 3000,
       sorting: translateSortingState(sorting, columns),
       filters: translateFiltersState(filters, columns),
       globalSearch,
