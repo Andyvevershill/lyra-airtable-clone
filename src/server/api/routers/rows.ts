@@ -25,21 +25,6 @@ export const rowsRouter = createTRPCRouter({
       const offset = input.cursor ?? 0;
       const { sorting, filters, globalSearch } = input;
 
-      //  Build dynamic LEFT JOINs for sorting columns
-      let query = ctx.db
-        .select({
-          rowId: rows.id,
-          rowTableId: rows.tableId,
-          rowPosition: rows.position,
-          cellId: cells.id,
-          cellRowId: cells.rowId,
-          cellColumnId: cells.columnId,
-          cellValue: cells.value,
-        })
-        .from(rows)
-        .leftJoin(cells, eq(cells.rowId, rows.id))
-        .$dynamic();
-
       //  Build WHERE conditions
       const whereConditions: SQL[] = [eq(rows.tableId, input.tableId)];
 
@@ -120,8 +105,8 @@ export const rowsRouter = createTRPCRouter({
         }
       }
 
-      // ── 3. Get filtered row IDs first (much faster) ──────────────────────
-      // Step 1: Get just the row IDs that match filters and sorting
+      //  Get filtered row IDs first
+      //  Get just the row IDs that match filters and sorting
       const orderByClauses: SQL[] = [];
 
       for (const sort of sorting) {
@@ -157,7 +142,7 @@ export const rowsRouter = createTRPCRouter({
 
       const rowIds = paginatedRows.map((r) => r.id);
 
-      // ── 4. Fetch all cells for these rows in ONE query ──────────────────
+      //Fetch all cells for these rows in ONE query
       const rowCells = rowIds.length
         ? await ctx.db
             .select({
@@ -170,7 +155,7 @@ export const rowsRouter = createTRPCRouter({
             .where(inArray(cells.rowId, rowIds))
         : [];
 
-      // ── 5. Assemble rows with cells ──────────────────────────────────────
+      //  Assemble rows with cells
       const rowsWithCells = paginatedRows.map((row) => ({
         id: row.id,
         tableId: row.tableId,
@@ -178,7 +163,7 @@ export const rowsRouter = createTRPCRouter({
         cells: rowCells.filter((c) => c.rowId === row.id),
       }));
 
-      // ── 6. Calculate Search Matches (if globalSearch exists) ─────────────
+      // Calculate Search Matches (if globalSearch exists)
       const searchMatches: {
         matches: SearchMatch[];
       } = { matches: [] };
