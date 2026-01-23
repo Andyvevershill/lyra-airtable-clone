@@ -29,6 +29,27 @@
       "when": 1768485953014,
       "tag": "0003_outgoing_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769159577376,
+      "tag": "0004_dizzy_maelstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1769165505990,
+      "tag": "0005_slim_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769165645141,
+      "tag": "0006_gorgeous_scorpion",
+      "breakpoints": true
     }
   ]
 }
