@@ -137,16 +137,20 @@ export const cells = pgTable(
     columnId: text("column_id")
       .notNull()
       .references(() => columns.id, { onDelete: "cascade" }),
-
     value: text("value"),
-
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (table) => [
     index("cell_row_idx").on(table.rowId),
     index("cell_column_idx").on(table.columnId),
-    // Composite unique constraint
     index("cell_row_column_unique_idx").on(table.rowId, table.columnId),
+    index("cell_row_column_value_idx").on(
+      table.rowId,
+      table.columnId,
+      table.value,
+    ),
+    index("cell_column_value_idx").on(table.columnId, table.value),
+    index("cell_value_lower_idx").on(sql`LOWER(${table.value})`),
   ],
 );
 

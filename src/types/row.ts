@@ -1,5 +1,4 @@
 import z from "zod";
-import type { Cell } from "./cell";
 import type { GlobalSearchMatches } from "./view";
 
 const rowSchema = z.object({
@@ -9,7 +8,9 @@ const rowSchema = z.object({
 
 export type Row = z.infer<typeof rowSchema>;
 
-export type RowWithCells = Row & { cells: Cell[] };
+export type RowWithCells = Row & {
+  cells: { id: string; columnId: string; value: string | null }[];
+};
 
 export type TransformedRow = {
   _rowId: string;
