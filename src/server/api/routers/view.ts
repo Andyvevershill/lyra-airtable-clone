@@ -90,6 +90,8 @@ export const viewRouter = createTRPCRouter({
         throw new Error("Cannot delete last view for this table");
       }
 
+      let nextViewId: string | null = null;
+
       // 3. If deleting the active view, activate another one
       if (currentView.isActive) {
         const nextView = allViews.find((v) => v.id !== currentView.id);
@@ -102,12 +104,14 @@ export const viewRouter = createTRPCRouter({
           .update(views)
           .set({ isActive: true })
           .where(eq(views.id, nextView.id));
+
+        nextViewId = nextView.id;
       }
 
       // 4. Delete the view
       await ctx.db.delete(views).where(eq(views.id, input.id));
 
-      return { success: true };
+      return { success: true, nextViewId };
     }),
 
   updateName: protectedProcedure

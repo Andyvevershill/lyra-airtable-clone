@@ -22,201 +22,183 @@ export const rowsRouter = createTRPCRouter({
   getRowsInfinite: protectedProcedure
     .input(getRowsInfiniteInput)
     .query(async ({ ctx, input }) => {
-      const offset = input.cursor ?? 0;
-      const { sorting, filters, globalSearch } = input;
+      const start = performance.now();
 
-      //  Build WHERE conditions
-      const whereConditions: SQL[] = [eq(rows.tableId, input.tableId)];
+      const { tableId, limit, cursor, filters, sorting, globalSearch } = input;
+      const offset = cursor ?? 0;
 
-      // Column filters - we need to filter on the joined cells
-      // For filters, we'll need to ensure the cell matches the column
-      if (filters.length > 0) {
-        const filterConditions: SQL[] = [];
+      // ─── 1. Load columns metadata ────────────────────────────────────────
+      const tableColumns = await ctx.db
+        .select({
+          id: columns.id,
+          type: columns.type,
+        })
+        .from(columns)
+        .where(eq(columns.tableId, tableId));
 
-        for (const f of filters) {
-          switch (f.operator) {
-            case "equals":
-              filterConditions.push(
-                and(
-                  eq(cells.columnId, f.columnId),
-                  eq(cells.value, f.value as string),
-                )!,
-              );
-              break;
-            case "contains":
-              filterConditions.push(
-                and(
-                  eq(cells.columnId, f.columnId),
-                  ilike(cells.value, `%${f.value}%`),
-                )!,
-              );
-              break;
-            case "notContains":
-              filterConditions.push(
-                and(
-                  eq(cells.columnId, f.columnId),
-                  not(ilike(cells.value, `%${f.value}%`)),
-                )!,
-              );
-              break;
-            case "greaterThan":
-              filterConditions.push(
-                and(
-                  eq(cells.columnId, f.columnId),
-                  gt(sql`CAST(${cells.value} AS NUMERIC)`, f.value as number),
-                )!,
-              );
-              break;
-            case "lessThan":
-              filterConditions.push(
-                and(
-                  eq(cells.columnId, f.columnId),
-                  lt(sql`CAST(${cells.value} AS NUMERIC)`, f.value as number),
-                )!,
-              );
-              break;
-            case "isEmpty":
-              filterConditions.push(
-                and(eq(cells.columnId, f.columnId), isNull(cells.value))!,
-              );
-              break;
-            case "isNotEmpty":
-              filterConditions.push(
-                and(eq(cells.columnId, f.columnId), isNotNull(cells.value))!,
-              );
-              break;
-            default:
-              continue;
-          }
+      const columnMap = new Map(tableColumns.map((c) => [c.id, c]));
+
+      // ─── 2. Build row filter conditions (using EXISTS) ────────────────────
+      const rowWhereClauses: SQL[] = [eq(rows.tableId, tableId)];
+
+      for (const filter of filters) {
+        const column = columnMap.get(filter.columnId);
+        if (!column) continue;
+
+        let cellCond: SQL;
+
+        switch (filter.operator) {
+          case "equals":
+            cellCond = eq(cells.value, filter.value as string);
+            break;
+          case "contains":
+            cellCond = ilike(cells.value, `%${filter.value}%`);
+            break;
+          case "notContains":
+            cellCond = not(ilike(cells.value, `%${filter.value}%`));
+            break;
+          case "greaterThan":
+            cellCond = gt(cells.value, filter.value as string);
+            break;
+          case "lessThan":
+            cellCond = lt(cells.value, filter.value as string);
+            break;
+          case "isEmpty":
+            cellCond = isNull(cells.value);
+            break;
+          case "isNotEmpty":
+            cellCond = isNotNull(cells.value);
+            break;
         }
 
-        // For filters, we use a subquery approach since we need ALL filters to match
-        // This checks that the row has cells matching all filter criteria
-        if (filterConditions.length > 0) {
-          for (const filterCond of filterConditions) {
-            whereConditions.push(
-              sql`EXISTS (
-                SELECT 1 FROM ${cells} 
-                WHERE ${cells.rowId} = ${rows.id} 
-                AND ${filterCond}
-              )`,
-            );
-          }
+        if (cellCond) {
+          rowWhereClauses.push(
+            sql`EXISTS (
+              SELECT 1 FROM ${cells}
+              WHERE ${cells.rowId} = ${rows.id}
+                AND ${cells.columnId} = ${filter.columnId}
+                AND ${cellCond}
+            )`,
+          );
         }
       }
 
-      //  Get filtered row IDs first
-      //  Get just the row IDs that match filters and sorting
+      const finalWhere = and(...rowWhereClauses);
+
+      // ─── 3. Build main paginated query with stable sorting ────────────────
+      let query = ctx.db
+        .select({
+          id: rows.id,
+          tableId: rows.tableId,
+          position: rows.position,
+        })
+        .from(rows)
+        .where(finalWhere)
+        .$dynamic();
+
       const orderByClauses: SQL[] = [];
 
-      for (const sort of sorting) {
-        // Use a lateral join or subquery for sorting
-        const sortExpr =
-          sort.type === "number"
-            ? sql`(SELECT CAST(value AS NUMERIC) FROM ${cells} WHERE ${cells.rowId} = ${rows.id} AND ${cells.columnId} = ${sort.columnId} LIMIT 1)`
-            : sql`(SELECT LOWER(value) FROM ${cells} WHERE ${cells.rowId} = ${rows.id} AND ${cells.columnId} = ${sort.columnId} LIMIT 1)`;
+      if (sorting.length > 0) {
+        const sort = sorting[0]!;
+        const col = columnMap.get(sort.columnId);
 
-        if (sort.direction === "desc") {
-          orderByClauses.push(sql`${sortExpr} DESC NULLS LAST`);
-        } else {
-          orderByClauses.push(sql`${sortExpr} ASC NULLS LAST`);
+        if (col) {
+          const sortValue = sql`(
+            SELECT ${cells.value}
+            FROM ${cells}
+            WHERE ${cells.rowId} = ${rows.id}
+              AND ${cells.columnId} = ${col.id}
+            LIMIT 1
+          )`;
+
+          const orderedExpr =
+            sort.direction === "asc"
+              ? sql`${sortValue} ASC NULLS LAST`
+              : sql`${sortValue} DESC NULLS LAST`;
+
+          orderByClauses.push(orderedExpr);
         }
       }
 
       orderByClauses.push(asc(rows.position));
 
-      const finalWhere = and(...whereConditions);
+      if (orderByClauses.length > 0) {
+        query = query.orderBy(...orderByClauses);
+      }
 
-      const [countResult] = await ctx.db
+      // ─── 4. Execute paginated fetch ───────────────────────────────────────
+      const pageRows = await query.limit(limit + 1).offset(offset);
+
+      const hasMore = pageRows.length > limit;
+      const visibleRows = hasMore ? pageRows.slice(0, limit) : pageRows;
+      const rowIds = visibleRows.map((r) => r.id);
+
+      // ─── 5. Fetch all cells for visible rows ──────────────────────────────
+      const cellsData = rowIds.length
+        ? await ctx.db.select().from(cells).where(inArray(cells.rowId, rowIds))
+        : [];
+
+      // ─── 6. Group cells by row ────────────────────────────────────────────
+      const cellsByRow = new Map<string, (typeof cellsData)[number][]>();
+      for (const cell of cellsData) {
+        const list = cellsByRow.get(cell.rowId) ?? [];
+        list.push(cell);
+        cellsByRow.set(cell.rowId, list);
+      }
+
+      // ─── 7. Build final items (in correct order) ──────────────────────────
+      const items = visibleRows.map((row) => ({
+        id: row.id,
+        tableId: row.tableId,
+        cells: (cellsByRow.get(row.id) ?? []).map((c) => ({
+          id: c.id,
+          columnId: c.columnId,
+          value: c.value,
+        })),
+      }));
+
+      // ─── 8. Total filtered count ──────────────────────────────────────────
+      const countResult = await ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(rows)
         .where(finalWhere);
 
-      const totalFilteredCount = countResult?.count ?? 0;
+      const totalFilteredCount = countResult[0]?.count ?? 0;
 
-      // Get paginated row IDs with sorting
-      const paginatedRows = await ctx.db
-        .select({
-          id: rows.id,
-          tableId: rows.tableId,
-        })
-        .from(rows)
-        .where(finalWhere)
-        .orderBy(...orderByClauses)
-        .limit(input.limit)
-        .offset(offset);
-
-      const rowIds = paginatedRows.map((r) => r.id);
-
-      //Fetch all cells for these rows in ONE query
-      const rowCells = rowIds.length
-        ? await ctx.db
-            .select({
-              id: cells.id,
-              rowId: cells.rowId,
-              columnId: cells.columnId,
-              value: cells.value,
-            })
-            .from(cells)
-            .where(inArray(cells.rowId, rowIds))
-        : [];
-
-      //  Assemble rows with cells
-      const rowsWithCells = paginatedRows.map((row) => ({
-        id: row.id,
-        tableId: row.tableId,
-        cells: rowCells.filter((c) => c.rowId === row.id),
-      }));
-
-      // Calculate Search Matches (if globalSearch exists)
-      const searchMatches: {
-        matches: SearchMatch[];
-      } = { matches: [] };
+      // ─── 9. Global search matches (current page only) ─────────────────────
+      const matches: SearchMatch[] = [];
 
       if (globalSearch?.trim()) {
-        const searchTerm = globalSearch.trim().toLowerCase();
-
-        // Column matches (first)
-        const tableColumns = await ctx.db
-          .select({ id: columns.id, name: columns.name })
-          .from(columns)
-          .where(eq(columns.tableId, input.tableId));
-
-        for (const col of tableColumns) {
-          if (col.name.toLowerCase().includes(searchTerm)) {
-            searchMatches.matches.push({
-              type: "column",
-              columnId: col.id,
-            });
-          }
-        }
-
-        // Cell matches - with row index
-        for (const cell of rowCells) {
-          if (cell.value?.toString().toLowerCase().includes(searchTerm)) {
-            const rowIndex = paginatedRows.findIndex(
-              (row) => row.id === cell.rowId,
-            );
-
-            searchMatches.matches.push({
-              type: "cell",
-              cellId: `${cell.rowId}_${cell.columnId}`,
-              rowIndex: rowIndex !== -1 ? rowIndex : 0,
-            });
-          }
-        }
+        const term = globalSearch.trim().toLowerCase();
+        items.forEach((row, idx) => {
+          row.cells.forEach((cell) => {
+            if (cell.value && String(cell.value).toLowerCase().includes(term)) {
+              matches.push({
+                type: "cell",
+                cellId: `${row.id}_${cell.columnId}`,
+                rowIndex: idx,
+              });
+            }
+          });
+        });
       }
 
-      // next cursor is undefined if there are no more rows - so we stop loading more. Otherwise we keep em coming
+      const nextCursor = hasMore ? offset + limit : undefined;
+
+      const duration = performance.now() - start;
+
+      console.log("[getRowsInfinite]", {
+        returned: items.length,
+        hasMore,
+        nextCursor: nextCursor ?? "none",
+        durationMs: duration.toFixed(1),
+      });
 
       return {
-        items: rowsWithCells,
-        searchMatches,
+        items,
+        searchMatches: { matches },
         totalFilteredCount,
-        nextCursor:
-          paginatedRows.length === input.limit
-            ? offset + input.limit
-            : undefined,
+        nextCursor,
       };
     }),
 
