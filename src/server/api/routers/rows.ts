@@ -13,6 +13,7 @@ import {
   isNull,
   lt,
   not,
+  SQL,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -38,13 +39,13 @@ export const rowsRouter = createTRPCRouter({
       const columnMap = new Map(tableColumns.map((c) => [c.id, c]));
 
       // ─── 2. Build row filter conditions (using EXISTS) ────────────────────
-      const rowWhereClauses: any[] = [eq(rows.tableId, tableId)];
+      const rowWhereClauses: SQL[] = [eq(rows.tableId, tableId)];
 
       for (const filter of filters) {
         const column = columnMap.get(filter.columnId);
         if (!column) continue;
 
-        let cellCond: any = undefined;
+        let cellCond: SQL;
 
         switch (filter.operator) {
           case "equals":
@@ -95,7 +96,7 @@ export const rowsRouter = createTRPCRouter({
         .where(finalWhere)
         .$dynamic();
 
-      const orderByClauses: any[] = [];
+      const orderByClauses: SQL[] = [];
 
       if (sorting.length > 0) {
         const sort = sorting[0]!;

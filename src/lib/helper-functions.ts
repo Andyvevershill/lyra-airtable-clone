@@ -56,7 +56,7 @@ export function translateFiltersState(
     .filter(Boolean) as FilterState[];
 }
 
-// trnsform BE view data to table readable data
+// transform BE view data to table readable data
 export function applyViewToTableState(
   view:
     | {
@@ -66,29 +66,33 @@ export function applyViewToTableState(
       }
     | null
     | undefined,
-  {
-    onSortingChange,
-    onColumnFiltersChange,
-    onColumnVisibilityChange,
-  }: {
-    onSortingChange: (state: SortingState) => void;
-    onColumnFiltersChange: (state: ColumnFiltersState) => void;
-    onColumnVisibilityChange: (state: VisibilityState) => void;
+  callbacks: {
+    onSortingChange: (
+      updater: SortingState | ((prev: SortingState) => SortingState),
+    ) => void;
+    onColumnFiltersChange: (
+      updater:
+        | ColumnFiltersState
+        | ((prev: ColumnFiltersState) => ColumnFiltersState),
+    ) => void;
+    onColumnVisibilityChange: (
+      updater: VisibilityState | ((prev: VisibilityState) => VisibilityState),
+    ) => void;
   },
 ): void {
-  onSortingChange(
+  callbacks.onSortingChange(
     view?.sorting?.map((s) => ({
       id: s.columnId,
       desc: s.direction === "desc",
     })) ?? [],
   );
-  onColumnFiltersChange(
+  callbacks.onColumnFiltersChange(
     view?.filters?.map((f) => ({
       id: f.columnId,
       value: { operator: f.operator, value: f.value },
     })) ?? [],
   );
-  onColumnVisibilityChange(
+  callbacks.onColumnVisibilityChange(
     view?.hidden?.reduce((acc, id) => ({ ...acc, [id]: false }), {}) ?? {},
   );
 }
