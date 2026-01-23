@@ -56,9 +56,9 @@ export function translateFiltersState(
     .filter(Boolean) as FilterState[];
 }
 
-// transform BE view data to table readable data
+// trnsform BE view data to table readable data
 export function applyViewToTableState(
-  view:
+  activeView:
     | {
         sorting?: SortRule[] | null;
         filters?: FilterState[] | null;
@@ -80,21 +80,41 @@ export function applyViewToTableState(
     ) => void;
   },
 ): void {
-  callbacks.onSortingChange(
-    view?.sorting?.map((s) => ({
-      id: s.columnId,
-      desc: s.direction === "desc",
-    })) ?? [],
-  );
-  callbacks.onColumnFiltersChange(
-    view?.filters?.map((f) => ({
-      id: f.columnId,
-      value: { operator: f.operator, value: f.value },
-    })) ?? [],
-  );
-  callbacks.onColumnVisibilityChange(
-    view?.hidden?.reduce((acc, id) => ({ ...acc, [id]: false }), {}) ?? {},
-  );
+  if (!activeView) {
+    callbacks.onSortingChange([]);
+    callbacks.onColumnFiltersChange([]);
+    callbacks.onColumnVisibilityChange({});
+    return;
+  }
+
+  // Sorting
+  const sortingState: SortingState =
+    activeView.sorting?.map((sort) => ({
+      id: sort.columnId,
+      desc: sort.direction === "desc",
+    })) ?? [];
+
+  callbacks.onSortingChange(sortingState);
+
+  // Filters
+  const filtersState: ColumnFiltersState =
+    activeView.filters?.map((filter) => ({
+      id: filter.columnId,
+      value: {
+        operator: filter.operator,
+        value: filter.value as unknown,
+      },
+    })) ?? [];
+
+  callbacks.onColumnFiltersChange(filtersState);
+
+  const visibilityState: VisibilityState = {};
+
+  for (const colId of activeView.hidden ?? []) {
+    visibilityState[colId] = false;
+  }
+
+  callbacks.onColumnVisibilityChange(visibilityState);
 }
 
 // transforms the sorts inside the form so we can send them to update the views
