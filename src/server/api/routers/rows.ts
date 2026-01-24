@@ -284,10 +284,13 @@ export const rowsRouter = createTRPCRouter({
         }
 
         return {
-          id: newRow.id,
-          tableId: newRow.tableId,
-          position: newRow.position,
-          cells: createdCells,
+          _rowId: newRow.id,
+          _cells: Object.fromEntries(
+            createdCells.map((cell) => [cell.columnId, cell.value]),
+          ),
+          _cellMap: Object.fromEntries(
+            createdCells.map((cell) => [cell.columnId, cell.id]),
+          ),
         };
       });
     }),

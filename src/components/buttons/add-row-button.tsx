@@ -26,7 +26,7 @@ function AddRowButton({
 
   const addRow = api.row.addRow.useMutation({
     onMutate: async (newRow) => {
-      // Cancel ALL queries to prevent stale data from overwriting our optimistic update
+      // Cancel ALL queries to prevent stale data from overwriting  optimistic update
       await utils.row.getRowsInfinite.cancel(queryParams);
       await utils.row.getRowCount.cancel({ tableId });
 
