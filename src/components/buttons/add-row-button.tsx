@@ -61,7 +61,9 @@ function AddRowButton({
           ...lastPage,
           items: [...lastPage.items, optimisticRow],
           searchMatches: lastPage.searchMatches ?? { matches: [] },
-          totalFilteredCount: lastPage.totalFilteredCount + 1,
+          totalFilteredCount: lastPage.totalFilteredCount
+            ? lastPage.items.length + 1
+            : 0,
         };
 
         return { ...old, pages: updatedPages };
