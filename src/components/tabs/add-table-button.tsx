@@ -27,11 +27,14 @@ export function AddTableButton({ baseId, tableNumber, setTables }: Props) {
 
   const tableId = createId();
 
+  const utils = api.useUtils();
+
   const createTable = api.table.createById.useMutation({
     onMutate: () => {
       setIsSaving(true);
     },
     onSuccess: () => {
+      void utils.base.getById.invalidate({ id: baseId });
       router.refresh();
     },
 

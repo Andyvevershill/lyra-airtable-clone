@@ -24,15 +24,22 @@ export function useEditableCell({
 }: Params) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue ?? "");
+  const [checked, setChecked] = useState<boolean>(
+    initialValue === "true" ? true : false,
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldSelectRef = useRef(true);
 
   const isNumber = dataType === "number";
+  const isCheckBox = dataType === "boolean";
 
   const isValidNumber = (v: string) => v === "" || /^-?\d*\.?\d*$/.test(v);
 
   const startEditing = (seed?: string) => {
+    if (isCheckBox) {
+      return;
+    }
     if (seed !== undefined) {
       setValue(seed);
       shouldSelectRef.current = false;
@@ -55,6 +62,10 @@ export function useEditableCell({
   }, [isEditing]);
 
   const commit = () => {
+    if (isCheckBox) {
+      onCommit(rowId, columnId, !checked === true ? "true" : "false", () => {});
+    }
+
     if (!isEditing) return;
 
     const next = value.trim() || null;
@@ -147,6 +158,9 @@ export function useEditableCell({
 
   return {
     isEditing,
+    setChecked,
+    checked,
+    isCheckBox,
     inputRef,
     value,
     startEditing,

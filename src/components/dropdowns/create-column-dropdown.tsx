@@ -70,6 +70,9 @@ export function CreateColumnDropdown({ tableId }: Props) {
     if (!value) return;
 
     setSelectedField(value);
+
+    console.log(selectedField);
+
     setSearchQuery("");
     setIsSubmenuOpen(true);
   }

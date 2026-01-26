@@ -1,7 +1,6 @@
-import { DEFAULT_BASE_CONFIG } from "@/lib/utils";
+import { DEFAULT_BASE_CONFIG, returnFakerData } from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { cells, columns, rows, tables, views } from "@/server/db/schemas/bases";
-import { faker } from "@faker-js/faker";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -25,7 +24,7 @@ export const tableRouter = createTRPCRouter({
             id: input.tableId,
             name: `Table ${input.tableNumber}`,
           })
-          .returning();
+          .returning({ id: tables.id });
 
         if (!table) throw new Error("Failed to create base");
 
@@ -41,11 +40,11 @@ export const tableRouter = createTRPCRouter({
             DEFAULT_BASE_CONFIG.columns.map((col) => ({
               tableId: table.id,
               name: col.name,
-              type: "string",
+              type: col.type,
               position: col.position,
             })),
           )
-          .returning();
+          .returning({ id: columns.id, type: columns.type });
 
         // 4. Create the rows (position will auto-increment via serial)
         const rowValues = Array.from(
@@ -62,7 +61,7 @@ export const tableRouter = createTRPCRouter({
             cellsToCreate.push({
               rowId: row.id,
               columnId: column.id,
-              value: faker.location.cardinalDirection(),
+              value: returnFakerData(column.type),
             });
           }
         }

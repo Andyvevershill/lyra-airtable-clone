@@ -3,6 +3,7 @@
 import { useEditableCell } from "@/hooks/use-editable-cell";
 import type { TransformedRow } from "@/types/row";
 import type { CellContext } from "@tanstack/react-table";
+import { Checkbox } from "../ui/checkbox";
 
 export type Props = CellContext<TransformedRow, unknown> & {
   columnId: string;
@@ -27,6 +28,9 @@ export default function EditableCell({
 
   const {
     isEditing,
+    isCheckBox,
+    checked,
+    setChecked,
     inputRef,
     value,
     startEditing,
@@ -45,10 +49,19 @@ export default function EditableCell({
 
   const isNumber = dataType === "number";
 
+  function onCheckedChange() {
+    setChecked(!checked);
+
+    commit();
+  }
+
   return (
     <div
       tabIndex={0}
-      className="h-full w-full outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+      className={
+        "h-full w-full outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset" +
+        (!isCheckBox && " focus:ring-2 focus:ring-blue-500 focus:ring-inset")
+      }
       onDoubleClick={() => startEditing()}
       onKeyDown={onKeyDown}
     >
@@ -75,6 +88,14 @@ export default function EditableCell({
             isNumber ? "text-right" : ""
           }`}
         />
+      ) : isCheckBox ? (
+        <div className="flex items-center justify-center py-2">
+          <Checkbox
+            checked={checked}
+            onCheckedChange={onCheckedChange}
+            className="pointer"
+          />
+        </div>
       ) : (
         <div
           className={`flex h-full w-full items-center px-3 text-[13px] ${

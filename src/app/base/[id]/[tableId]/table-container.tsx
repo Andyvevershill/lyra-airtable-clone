@@ -103,6 +103,13 @@ export default function TableContainer({
     [sidebarOpen],
   );
 
+  // Calculate effective row count (filters may reduce total)
+  const isFilteringRows = table.getState().columnFilters.length > 0;
+  const effectiveRowCount =
+    isFilteringRows && totalFilteredCount !== undefined
+      ? totalFilteredCount
+      : rowCount;
+
   function handleClearFilters() {
     onColumnFiltersChange([]);
     updateViewFilters([]);
@@ -156,12 +163,11 @@ export default function TableContainer({
             ) : (
               <Table
                 table={table}
+                effectiveRowCount={effectiveRowCount}
                 queryParams={queryParams}
                 tableId={tableWithViews.id}
-                rowCount={rowCount}
                 transformedRows={transformedRows}
                 columns={columns}
-                totalFilteredCount={totalFilteredCount}
                 fetchNextPage={fetchNextPage}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
@@ -172,7 +178,8 @@ export default function TableContainer({
 
           <div className="border-t border-gray-300 bg-white px-3 py-2">
             <div className="text-xs text-gray-600">
-              {rowCount} {rowCount === 1 ? "record" : "records"}
+              {effectiveRowCount}{" "}
+              {effectiveRowCount === 1 ? "record" : "records"}
               {isFetchingNextPage && " – Loading more…"}
             </div>
           </div>

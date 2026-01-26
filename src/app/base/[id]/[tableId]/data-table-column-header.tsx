@@ -2,6 +2,7 @@ import ColumnActionDropdown from "@/components/dropdowns/column-actions-dropdown
 import type { Column } from "@tanstack/react-table";
 import React, { useState } from "react";
 import { FaA } from "react-icons/fa6";
+import { IoIosCheckboxOutline } from "react-icons/io";
 import { PiHashStraightLight } from "react-icons/pi";
 
 interface DataTableColumnHeaderProps<
@@ -19,6 +20,8 @@ export function ColumnTypeIcon({ type }: { type?: string }) {
       return <PiHashStraightLight className="h-4 w-4 text-gray-900" />;
     case "string":
       return <FaA className="h-3 w-3 text-gray-600" />;
+    case "boolean":
+      return <IoIosCheckboxOutline className="h-4 w-4 text-gray-600" />;
 
     default:
       return null;
