@@ -57,7 +57,7 @@ export function TableBody({
                   minWidth: GUTTER_WIDTH,
                 }}
               >
-                <Skeleton className="ml-6 h-3 w-8 rounded-sm" />
+                <Skeleton className="ml-1 h-3 w-8 rounded-sm" />
               </td>
 
               {/* SKELETON CELLS FOR ALL COLUMNS */}
@@ -65,7 +65,7 @@ export function TableBody({
                 <td
                   key={column.id}
                   className={cn(
-                    "overflow-hidden border border-t-0 border-gray-200 px-2",
+                    "overflow-hidden border border-t-0 border-gray-200 pl-4",
                     index === 0 && "border-l-0",
                   )}
                   style={{

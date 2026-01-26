@@ -56,7 +56,7 @@ export const standardFields = [
   { icon: FaA, name: "Single line text", value: "string" },
   { icon: CiTextAlignLeft, name: "Long text", value: "string" },
   { icon: IoDocumentOutline, name: "Attachment" },
-  { icon: IoCheckboxOutline, name: "Checkbox" },
+  { icon: IoCheckboxOutline, name: "Checkbox", value: "boolean" },
   { icon: GoMultiSelect, name: "Multiple select" },
   { icon: IoIosArrowDropdown, name: "Single select" },
   { icon: CiUser, name: "User" },

@@ -1,4 +1,5 @@
 import type { RowWithCells, TransformedRow } from "@/types";
+import { faker } from "@faker-js/faker";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -22,12 +23,12 @@ export const DEFAULT_BASE_CONFIG = {
     "#4A044E",
   ],
   columns: [
-    { name: "Name", position: 0 },
-    { name: "Notes", position: 1 },
-    { name: "Assignee", position: 2 },
-    { name: "Status", position: 3 },
-    { name: "Attachments", position: 4 },
-    { name: "Attachment Summary", position: 5 },
+    { name: "Name", position: 0, type: "string" },
+    { name: "Notes", position: 1, type: "string" },
+    { name: "Assignee", position: 2, type: "string" },
+    { name: "Status", position: 3, type: "string" },
+    { name: "Number", position: 6, type: "number" },
+    { name: "Done", position: 7, type: "boolean" },
   ],
   defaultTableName: "Table 1",
   defaultRowCount: 3,
@@ -106,4 +107,46 @@ export function transformRowsToTanStackFormat(
 
     return transformedRow;
   });
+}
+
+// generates faker data depending on what the column type is (bulk action)
+export function generateBulkFakerData(type: string, count: number) {
+  const data: string[] = [];
+  for (let i = 0; i < count; i++) {
+    switch (type) {
+      case "string":
+        data.push(faker.person.firstName());
+        break;
+      case "number":
+        data.push(faker.number.int({ max: 1000 }).toString());
+        break;
+      case "boolean":
+        data.push(faker.datatype.boolean().toString());
+        break;
+      default:
+        data.push("");
+    }
+  }
+  return data;
+}
+
+// generates faker data depending on what the column type is (single return)
+export function returnFakerData(type: string) {
+  let data = "";
+
+  switch (type) {
+    case "string":
+      data = faker.person.firstName();
+      break;
+    case "number":
+      data = faker.number.int({ max: 1000 }).toString();
+      break;
+    case "boolean":
+      data = faker.datatype.boolean().toString();
+      break;
+    default:
+      data = "string";
+  }
+
+  return data;
 }

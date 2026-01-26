@@ -27,25 +27,28 @@ export default function Add100kRowButton({ tableId }: Props) {
 
       // Optimistically update count
       if (previousCount !== undefined) {
-        utils.row.getRowCount.setData({ tableId }, previousCount + count);
+        utils.row.getRowCount.setData(
+          { tableId },
+          Number(previousCount) + Number(count),
+        );
       }
 
-      // Return context for rollback
       return { previousCount };
     },
 
-    onError: (error, _vars, context) => {
-      console.error("Failed to add rows:", error);
-
-      // Rollback on error
+    onError: (_error, _vars, context) => {
       if (context?.previousCount !== undefined) {
         utils.row.getRowCount.setData({ tableId }, context.previousCount);
       }
+
+      // incase we have created x rows before the error happened, we need to invalidate the cache to see the new ones!
+      void utils.row.getRowsInfinite.invalidate({ tableId });
+      void utils.row.getRowCount.invalidate({ tableId });
     },
 
     onSuccess: () => {
-      // Invalidate to get the actual new rows
       void utils.row.getRowsInfinite.invalidate({ tableId });
+      void utils.row.getRowCount.invalidate({ tableId });
     },
 
     onSettled: () => {

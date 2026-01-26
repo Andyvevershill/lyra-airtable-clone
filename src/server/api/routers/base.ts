@@ -1,4 +1,8 @@
-import { DEFAULT_BASE_CONFIG, getRandomColour } from "@/lib/utils";
+import {
+  DEFAULT_BASE_CONFIG,
+  getRandomColour,
+  returnFakerData,
+} from "@/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   bases,
@@ -8,7 +12,6 @@ import {
   tables,
   views,
 } from "@/server/db/schemas/bases";
-import { faker } from "@faker-js/faker";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -35,7 +38,7 @@ export const baseRouter = createTRPCRouter({
           baseId: base.id,
           name: DEFAULT_BASE_CONFIG.defaultTableName,
         })
-        .returning();
+        .returning({ id: tables.id });
 
       if (!table) throw new Error("Failed to create base");
 
@@ -51,11 +54,11 @@ export const baseRouter = createTRPCRouter({
           DEFAULT_BASE_CONFIG.columns.map((col) => ({
             tableId: table.id,
             name: col.name,
-            type: "string",
+            type: col.type,
             position: col.position,
           })),
         )
-        .returning();
+        .returning({ id: columns.id, type: columns.type });
 
       // 4. Create the rows (position will auto-increment via serial)
       const rowValues = Array.from(
@@ -65,7 +68,10 @@ export const baseRouter = createTRPCRouter({
         }),
       );
 
-      const createdRows = await tx.insert(rows).values(rowValues).returning();
+      const createdRows = await tx
+        .insert(rows)
+        .values(rowValues)
+        .returning({ id: rows.id });
 
       // 5. Create the cells (3 rows × 6 columns = 18 cells)
       const cellsToCreate = [];
@@ -74,7 +80,7 @@ export const baseRouter = createTRPCRouter({
           cellsToCreate.push({
             rowId: row.id,
             columnId: column.id,
-            value: faker.animal.crocodilia(),
+            value: returnFakerData(column.type),
           });
         }
       }
@@ -92,6 +98,13 @@ export const baseRouter = createTRPCRouter({
     return await ctx.db.query.bases.findMany({
       where: eq(bases.userId, ctx.session.user.id),
       orderBy: [desc(bases.lastAccessedAt)],
+      columns: {
+        id: true,
+        name: true,
+        colour: true,
+        lastAccessedAt: true,
+        isFavourite: true,
+      },
       with: {
         tables: {
           columns: {
@@ -112,6 +125,13 @@ export const baseRouter = createTRPCRouter({
           eq(bases.id, input.id),
           eq(bases.userId, ctx.session.user.id),
         ),
+        columns: {
+          id: true,
+          name: true,
+          colour: true,
+          isFavourite: true,
+          lastAccessedAt: true,
+        },
         with: {
           tables: {
             columns: {

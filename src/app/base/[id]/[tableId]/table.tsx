@@ -24,10 +24,9 @@ interface Props {
   table: Table<TransformedRow>;
   tableId: string;
   columns: ColumnType[];
-  rowCount: number;
+  effectiveRowCount: number;
   transformedRows: TransformedRow[];
   queryParams: QueryParams;
-  totalFilteredCount: number;
   fetchNextPage: () => void;
   hasNextPage?: boolean;
   isFetchingNextPage: boolean;
@@ -42,10 +41,9 @@ export function Table({
   table,
   tableId,
   columns,
-  rowCount,
+  effectiveRowCount,
   transformedRows,
   queryParams,
-  totalFilteredCount,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -68,13 +66,6 @@ export function Table({
 
     return () => observer.disconnect();
   }, []);
-
-  // Calculate effective row count (filters may reduce total)
-  const isFiltering = table.getState().columnFilters.length > 0;
-  const effectiveRowCount =
-    isFiltering && totalFilteredCount !== undefined
-      ? totalFilteredCount
-      : rowCount;
 
   // Virtual scrolling for performance with large datasets
   const rowVirtualizer = useVirtualizer({
