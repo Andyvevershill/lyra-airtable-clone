@@ -132,7 +132,7 @@ export function generateBulkFakerData(type: string, count: number) {
 
 // generates faker data depending on what the column type is (single return)
 export function returnFakerData(type: string) {
-  let data: string = "";
+  let data = "";
 
   switch (type) {
     case "string":
