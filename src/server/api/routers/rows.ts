@@ -338,7 +338,7 @@ export const rowsRouter = createTRPCRouter({
 
             // Step 2: Generate faker data per column
             const fakerStartTime = Date.now();
-            const fakerDataByColumn = new Map<string, any[]>();
+            const fakerDataByColumn = new Map<string, string[]>();
 
             for (const column of tableColumns) {
               fakerDataByColumn.set(
@@ -352,8 +352,8 @@ export const rowsRouter = createTRPCRouter({
 
             // Step 3: Generate & insert cells incrementally + batch them
             const cellFlushSize = 12500;
-            let cellBuffer: any[] = [];
-            const cellInsertQueries: any[] = [];
+            let cellBuffer = [];
+            const cellInsertQueries = [];
 
             for (let rowIdx = 0; rowIdx < insertedRows.length; rowIdx++) {
               const row = insertedRows[rowIdx];

@@ -110,7 +110,7 @@ export function transformRowsToTanStackFormat(
 }
 
 // generates faker data depending on what the column type is (bulk action)
-export function generateBulkFakerData(type: string, count: number): string[] {
+export function generateBulkFakerData(type: string, count: number) {
   const data: string[] = [];
   for (let i = 0; i < count; i++) {
     switch (type) {

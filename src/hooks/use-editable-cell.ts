@@ -63,6 +63,7 @@ export function useEditableCell({
 
   const commit = () => {
     if (isCheckBox) {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       onCommit(rowId, columnId, !checked === true ? "true" : "false", () => {});
     }
 
