@@ -66,6 +66,11 @@ export function useEditableCell({
     }
 
     setIsEditing(false);
+
+    // Only commit if the value actually changed
+    if (next !== initialValue) {
+      onCommit(rowId, columnId, next, () => {});
+    }
   };
 
   const cancel = () => {
