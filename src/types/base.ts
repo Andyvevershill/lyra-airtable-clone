@@ -3,12 +3,12 @@ import type { Table } from "./table";
 
 const baseSchema = z.object({
   id: z.string(),
-  // userId: z.string(),
   name: z.string(),
 
   // icon: z.string().nullable(),
   colour: z.string(),
   isFavourite: z.boolean(),
+  lastAccessedAt: z.date(),
 });
 
 export type Base = z.infer<typeof baseSchema>;
