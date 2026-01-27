@@ -1,4 +1,4 @@
-## AirTable Clone Project
+# AirTable Clone Project
 
 Project link:
 https://lyra-airtable-clone-andrew-hills-projects-e6822b9b.vercel.app/
@@ -6,14 +6,14 @@ https://lyra-airtable-clone-andrew-hills-projects-e6822b9b.vercel.app/
 Real Airtable (for UI comparison): 
 https://airtable.com/
 
-# 🛠️ Tech Stack
+##  🛠️ Tech Stack
 
 
 Tech: Next.js, TypeScript, React, Zustand, tRPC, Tailwind CSS, Tanstack, BetterAuth
 Database + Deployment: PostgreSQL with Drizzle ORM + Neon, Vercel
 UI Components: shadcn/ui
 
-# Important info
+##  Important info
 
 I have built this demo in ≈ three weeks so it's important to understand the functional limitations outlined below:
 
