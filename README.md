@@ -26,7 +26,7 @@ I have built this demo in ≈ three weeks so it's important to understand the fu
 5. Functionality => Filtering, sorting and searching are implimented through the backend for scalability of large datasets.
 6. Views => fully functional: rename, change active, duplicate, delete. Any changes to filtering/sorting/hidden fields, will automatically be saved to the view and preloaded into the table when reselecting this view.
 
-As a junior, feedback is priceless. If you have the time to play around with the app and look through the code, I would welcome and constructive criticism, Please reach out and message me on LinkedIn: https://www.linkedin.com/in/andrew-hill-90b920234/
+As a junior, feedback is priceless. If you have the time to play around with the app and look through the code, I would welcome any and all constructive criticism, Please reach out and message me on LinkedIn: https://www.linkedin.com/in/andrew-hill-90b920234/
 
 
 
