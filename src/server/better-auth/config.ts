@@ -19,7 +19,6 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  trustedOrigins: ["https://airtable-clone-andrew-hills-projects.vercel.app"],
 });
 
 export type Session = typeof auth.$Infer.Session;
