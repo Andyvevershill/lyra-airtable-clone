@@ -1,7 +1,8 @@
 # AirTable Clone Project
 
 Project link:
-https://lyra-airtable-clone-andrew-hills-projects-e6822b9b.vercel.app/
+https://airtable-clone-andrew-hills-projects.vercel.app
+
 
 Real Airtable (for UI comparison): 
 https://airtable.com/
