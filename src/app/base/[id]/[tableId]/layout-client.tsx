@@ -9,7 +9,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function BaseLayoutClient({ baseId, children }: Props) {
+export function LayoutClient({ baseId, children }: Props) {
   const { data: base } = api.base.getById.useQuery({ id: baseId });
 
   // No loading state needed because data is prefetched on server
