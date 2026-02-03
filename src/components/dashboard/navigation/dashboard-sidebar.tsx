@@ -110,10 +110,12 @@ export function DashboardSidebar() {
                             Starred
                           </span>
                           {state !== "collapsed" && (
-                            <ChevronDown
-                              style={{ width: "16px", height: "16px" }}
-                              className="ml-auto text-gray-500 transition-transform group-data-[state=open]/collapsible:rotate-180"
-                            />
+                            <div className="ml-auto rounded p-1 hover:bg-gray-200">
+                              <ChevronDown
+                                style={{ width: "16px", height: "16px" }}
+                                className="text-gray-500 transition-transform group-data-[state=open]/collapsible:rotate-180"
+                              />
+                            </div>
                           )}
                         </a>
                       </SidebarMenuButton>

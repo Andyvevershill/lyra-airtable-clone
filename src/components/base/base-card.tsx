@@ -43,7 +43,7 @@ export default function BaseCard({ base }: props) {
 
   return (
     <div
-      className="pointer relative flex h-[95px] w-[341px] flex-row gap-4 rounded-md border border-gray-200 bg-white p-4 shadow-2xs hover:shadow-md"
+      className="pointer relative flex h-[100px] w-[315px] flex-row gap-4 rounded-md border border-gray-200 bg-white p-4 shadow-2xs hover:shadow-md"
       onClick={handleRedirect}
       onMouseEnter={handleHover}
       onMouseLeave={() => setOnHover(false)}
@@ -88,7 +88,7 @@ export default function BaseCard({ base }: props) {
           {onHover ? (
             <div className="flex items-center">
               <BiCoinStack />
-              <p className="ml-2.5 text-xs text-gray-500">Open data</p>
+              <p className="ml-2.5 text-[11px] text-gray-500">Open data</p>
             </div>
           ) : (
             <p className="text-[11px] text-gray-500">
