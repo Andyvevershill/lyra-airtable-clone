@@ -1,6 +1,7 @@
 "use client";
 
 import type { TableWithViews } from "@/types";
+import type { QueryParams } from "@/types/view";
 import type { User } from "better-auth";
 import { useState } from "react";
 import { CiSearch } from "react-icons/ci";
@@ -13,8 +14,16 @@ interface Props {
   user: User;
   sidebarOpen: boolean;
   tableWithViews: TableWithViews;
+  rowCount: number;
+  queryParams: QueryParams;
 }
-export function TableSidebar({ user, tableWithViews, sidebarOpen }: Props) {
+export function TableSidebar({
+  user,
+  queryParams,
+  tableWithViews,
+  sidebarOpen,
+  rowCount,
+}: Props) {
   const [views, setViews] = useState(tableWithViews.views);
   const [hoveredViewId, setHoveredViewId] = useState<string | null>(null);
   const [editViewId, setEditViewId] = useState<string | null>(null);
@@ -78,7 +87,11 @@ export function TableSidebar({ user, tableWithViews, sidebarOpen }: Props) {
             <p>Rows will be added with fake data from faker.js</p>
           </div>
           <div className="flex w-full flex-row gap-2 p-2">
-            <Add1kRowButton tableId={tableWithViews.id} />
+            <Add1kRowButton
+              tableId={tableWithViews.id}
+              rowCount={rowCount}
+              queryParams={queryParams}
+            />
             <Add100kRowButton tableId={tableWithViews.id} user={user} />
           </div>
         </div>

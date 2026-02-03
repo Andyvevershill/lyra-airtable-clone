@@ -2,7 +2,7 @@ import { BaseSideRail } from "@/components/base/base-side-rail";
 import { getSession } from "@/server/better-auth/server";
 import { api, HydrateClient } from "@/trpc/server";
 import { redirect } from "next/navigation";
-import { BaseLayoutClient } from "./[tableId]/layout-client";
+import { LayoutClient } from "./[tableId]/layout-client";
 
 export default async function Layout({
   children,
@@ -27,7 +27,7 @@ export default async function Layout({
 
         {/* Main content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <BaseLayoutClient baseId={id}>{children}</BaseLayoutClient>
+          <LayoutClient baseId={id}>{children}</LayoutClient>
         </div>
       </div>
     </HydrateClient>

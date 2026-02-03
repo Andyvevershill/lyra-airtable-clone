@@ -25,9 +25,15 @@ export default function DateRangeDropdownSelector() {
       onValueChange={(value: keyof typeof RANGE_OPTIONS) => setRange(value)}
     >
       <SelectTrigger className="border-0 bg-transparent pl-0 shadow-none">
-        <SelectValue>{RANGE_OPTIONS[range]}</SelectValue>
+        <SelectValue className="text-gray-600">
+          {RANGE_OPTIONS[range]}
+        </SelectValue>
       </SelectTrigger>
-      <SelectContent align="start" position="popper" className="w-60 p-3">
+      <SelectContent
+        align="start"
+        position="popper"
+        className="w-60 p-3 text-gray-600"
+      >
         <SelectItem value="today">Today</SelectItem>
         <SelectItem value="last_7_days">In the past 7 days</SelectItem>
         <SelectItem value="last_30_days">In the past 30 days</SelectItem>
