@@ -1,7 +1,7 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import { MenubarSeparator } from "@/components/ui/menubar";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import { useState } from "react";
 import { CgProfile } from "react-icons/cg";

@@ -1,8 +1,8 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useViewStore } from "@/app/stores/use-view-store";
 import { type View } from "@/server/db/schemas";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import type { User } from "better-auth";

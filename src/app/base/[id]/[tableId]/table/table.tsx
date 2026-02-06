@@ -1,11 +1,11 @@
 "use client";
 
-import { useGlobalSearchStore } from "@/app/stores/use-search-store";
 import { CreateColumnDropdown } from "@/components/dropdowns/create-column-dropdown";
 import { TableBody } from "@/components/table/table-body";
 import { TableFooter } from "@/components/table/table-footer";
 import { TableHeader } from "@/components/table/table-header";
 import { useTableKeyboardNavigation } from "@/hooks/use-table-keyboard-nav";
+import { useGlobalSearchStore } from "@/stores/use-search-store";
 import type { ColumnType } from "@/types/column";
 import type { TransformedRow } from "@/types/row";
 import type { QueryParams, SearchMatch } from "@/types/view";
@@ -34,7 +34,7 @@ interface Props {
 }
 
 const ROW_HEIGHT = 32;
-const PREFETCH_THRESHOLD = 200;
+const PREFETCH_THRESHOLD = 250;
 const SCROLL_THROTTLE_MS = 300;
 
 export function Table({

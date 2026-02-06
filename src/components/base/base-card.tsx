@@ -1,8 +1,8 @@
 "use client";
 
-import { useSidebarStore } from "@/app/stores/use-sidebar-store";
-import { useViewStore } from "@/app/stores/use-view-store";
 import { cn, getLastAccessed } from "@/lib/utils";
+import { useSidebarStore } from "@/stores/use-sidebar-store";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import type { typeBaseWithTableIds } from "@/types/base";
 import { Star } from "lucide-react";

@@ -1,4 +1,4 @@
-import { useSavingStore } from "@/app/stores/use-saving-store";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import { RiDeleteBinLine } from "react-icons/ri";
 

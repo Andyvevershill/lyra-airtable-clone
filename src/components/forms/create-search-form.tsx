@@ -1,10 +1,10 @@
 "use client";
 
-import { useGlobalSearchStore } from "@/app/stores/use-search-store";
 import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGlobalSearchStore } from "@/stores/use-search-store";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";

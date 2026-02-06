@@ -23,7 +23,7 @@ export default async function Layout({
         } as React.CSSProperties
       }
     >
-      <div className="flex h-screen w-full flex-col overflow-hidden">
+      <div className="relative flex h-screen w-full flex-col overflow-hidden">
         {/* Top nav - fixed height, on top */}
         <DashboardTopNav user={session.user} />
 

@@ -1,6 +1,6 @@
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import { showNotFunctionalToast } from "@/lib/utils";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { SquareArrowOutUpRight, Wand2 } from "lucide-react";
 import { LuLoaderPinwheel } from "react-icons/lu";
 import { VscHistory } from "react-icons/vsc";
