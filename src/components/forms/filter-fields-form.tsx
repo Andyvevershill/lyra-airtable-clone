@@ -1,6 +1,5 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
 import {
   Select,
   SelectContent,
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useViewUpdater } from "@/hooks/use-view-updater";
 import { transformFiltersToView } from "@/lib/helper-functions";
+import { useLoadingStore } from "@/stores/use-loading-store";
 import type { TransformedRow } from "@/types";
 import type { Column, ColumnFiltersState } from "@tanstack/react-table";
 import { HelpCircle } from "lucide-react";

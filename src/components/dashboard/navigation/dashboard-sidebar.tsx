@@ -1,6 +1,5 @@
 "use client";
 
-import { useSidebarStore } from "@/app/stores/use-sidebar-store";
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,6 +16,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn, showNotFunctionalToast } from "@/lib/utils";
+import { useSidebarStore } from "@/stores/use-sidebar-store";
 import { api } from "@/trpc/react";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";

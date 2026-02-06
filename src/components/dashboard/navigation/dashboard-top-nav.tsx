@@ -1,8 +1,14 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useSavingStore } from "@/stores/use-saving-store";
+import { useSidebarStore } from "@/stores/use-sidebar-store";
 import type { User } from "@/types/users";
 import { Bell, HelpCircle, Search } from "lucide-react";
 import Image from "next/image";
@@ -15,6 +21,7 @@ interface props {
 }
 
 export function DashboardTopNav({ user }: props) {
+  const { sideBarOpen } = useSidebarStore();
   const router = useRouter();
 
   const isSaving = useSavingStore((state) => state.isSaving);
@@ -24,7 +31,14 @@ export function DashboardTopNav({ user }: props) {
     <div className="shadow-b relative z-100 flex h-[56px] w-full items-center justify-between border-b border-gray-200 bg-white px-3 shadow-xs">
       {/* Left: sidebar trigger, logo */}
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="pointer" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger className="pointer" />
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="center">
+            {sideBarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          </TooltipContent>
+        </Tooltip>
         <div className="ml-2 flex flex-row gap-1">
           <Image
             src="/airtable-icon.png"

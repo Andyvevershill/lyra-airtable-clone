@@ -1,4 +1,4 @@
-import { useLoadingStore } from "@/app/stores/use-loading-store";
+import { useLoadingStore } from "@/stores/use-loading-store";
 import { api } from "@/trpc/react";
 import type { QueryParams } from "@/types/view";
 import { toast } from "sonner";
@@ -76,6 +76,8 @@ export default function Add1kRowButton({
     });
   };
 
+  console.log(tableId);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -93,7 +95,7 @@ export default function Add1kRowButton({
       </TooltipTrigger>
       <TooltipContent side="bottom" align="center">
         {limitReached
-          ? "You have reached the maximum of 10,000 rows for this table."
+          ? "You have reached the maximum of 5,000 rows for this table."
           : "Add 1,000 rows to the table."}
       </TooltipContent>
     </Tooltip>

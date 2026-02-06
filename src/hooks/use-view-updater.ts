@@ -1,4 +1,4 @@
-import { useViewStore } from "@/app/stores/use-view-store";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import type { FilterState, SortRule } from "@/types/view";
 

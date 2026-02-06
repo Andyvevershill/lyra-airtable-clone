@@ -1,6 +1,5 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { showNotFunctionalToast } from "@/lib/utils";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import { Plus } from "lucide-react";
 import Image from "next/image";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import type { QueryParams } from "@/types/view";
 import { useCallback } from "react";

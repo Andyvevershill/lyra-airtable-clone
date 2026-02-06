@@ -1,12 +1,12 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
 import { generateColumnDefinitions } from "@/components/columns/generate-column-definitions";
 import { TableSidebar } from "@/components/table/table-sidebar";
 import { TableToolbar } from "@/components/table/table-toolbar";
 import { useCellCommitter } from "@/hooks/use-cell-commiter";
 import { useViewUpdater } from "@/hooks/use-view-updater";
 import { transformRowsToTanStackFormat } from "@/lib/utils";
+import { useLoadingStore } from "@/stores/use-loading-store";
 import type { RowWithCells, TableWithViews } from "@/types";
 import type { ColumnType } from "@/types/column";
 import type { QueryParams, SearchMatch } from "@/types/view";

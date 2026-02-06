@@ -1,11 +1,11 @@
 "use client";
 
-import { useViewStore } from "@/app/stores/use-view-store";
 import {
   darkenColour,
   lightenColour,
   showNotFunctionalToast,
 } from "@/lib/utils";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import type { BaseWithTables } from "@/types/base";
 import Link from "next/link";

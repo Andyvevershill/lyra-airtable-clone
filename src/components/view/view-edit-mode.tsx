@@ -1,7 +1,7 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import type { View } from "@/server/db/schemas";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import { useState } from "react";
 import { Input } from "../ui/input";

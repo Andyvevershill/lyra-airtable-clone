@@ -1,4 +1,5 @@
-import { useLoadingStore } from "@/app/stores/use-loading-store";
+import { cn } from "@/lib/utils";
+import { useLoadingStore } from "@/stores/use-loading-store";
 import { api } from "@/trpc/react";
 import type { User } from "@/types";
 import { toast } from "sonner";
@@ -65,20 +66,30 @@ export default function Add100kRowButton({ tableId, user }: Props) {
     });
   };
 
+  console.log(user.email);
+
+  const shouldDisable = user.email !== "andrew.hill@lcsltd.co.uk";
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          className="flex w-full cursor-not-allowed items-center justify-center rounded-xs border-1 bg-slate-50 p-2 text-[12px]"
-          disabled={true}
+          className={cn(
+            "flex w-full items-center justify-center rounded-xs border-1 bg-slate-50 p-2 text-[12px]",
+            shouldDisable ? "cursor-not-allowed" : "pointer",
+          )}
+          disabled={addRow.isPending || shouldDisable}
           onClick={handleAddRow}
         >
           {addRow.isPending ? "Adding..." : "Add 100k rows"}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" align="center">
-        {`Sorry ${user.name.split(" ")[0]}, only the creator can add 100k rows at a time`}
-      </TooltipContent>
+      {shouldDisable && (
+        <TooltipContent side="bottom" align="center">
+          {shouldDisable &&
+            `Sorry ${user.name.split(" ")[0]}, only the creator can add 100k rows at a time`}
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }

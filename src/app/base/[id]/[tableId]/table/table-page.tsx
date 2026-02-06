@@ -1,13 +1,13 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useGlobalSearchStore } from "@/app/stores/use-search-store";
-import { useViewStore } from "@/app/stores/use-view-store";
 import {
   applyViewToTableState,
   translateFiltersState,
   translateSortingState,
 } from "@/lib/helper-functions";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useGlobalSearchStore } from "@/stores/use-search-store";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import type { QueryParams } from "@/types/view";
 import type {
@@ -103,7 +103,7 @@ export default function TablePage() {
 
     return {
       tableId,
-      limit: 1000,
+      limit: 500,
       sorting: translatedSorting,
       filters: translatedFilters,
       globalSearch,

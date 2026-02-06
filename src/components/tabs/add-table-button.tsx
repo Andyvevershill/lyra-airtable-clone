@@ -1,6 +1,5 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import {
   Menubar,
   MenubarContent,
@@ -8,6 +7,7 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import { createId } from "@paralleldrive/cuid2";
 import { Plus } from "lucide-react";

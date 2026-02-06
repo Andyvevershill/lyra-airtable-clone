@@ -1,4 +1,4 @@
-import { useSavingStore } from "@/app/stores/use-saving-store";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import type { typeBaseWithTableIds } from "@/types/base";
 import { BiCoinStack } from "react-icons/bi";

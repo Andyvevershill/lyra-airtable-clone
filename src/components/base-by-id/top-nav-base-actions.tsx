@@ -1,6 +1,5 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import type { Base } from "@/types/base";
 import { Star } from "lucide-react";

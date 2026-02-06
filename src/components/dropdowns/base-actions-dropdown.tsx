@@ -1,6 +1,5 @@
 "use client";
 
-import { useSavingStore } from "@/app/stores/use-saving-store";
 import {
   Menubar,
   MenubarContent,
@@ -8,6 +7,7 @@ import {
   MenubarMenu,
   MenubarSeparator,
 } from "@/components/ui/menubar";
+import { useSavingStore } from "@/stores/use-saving-store";
 import { api } from "@/trpc/react";
 import type { typeBaseWithTableIds } from "@/types/base";
 import { MenubarTrigger } from "@radix-ui/react-menubar";

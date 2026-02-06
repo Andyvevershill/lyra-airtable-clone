@@ -1,9 +1,9 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useViewStore } from "@/app/stores/use-view-store";
 import { Button } from "@/components/ui/button";
 import { showNotFunctionalToast } from "@/lib/utils";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useViewStore } from "@/stores/use-view-store";
 import type { TransformedRow } from "@/types";
 import type { Table } from "@tanstack/react-table";
 import {

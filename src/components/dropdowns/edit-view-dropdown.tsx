@@ -1,8 +1,5 @@
 "use client";
 
-import { useLoadingStore } from "@/app/stores/use-loading-store";
-import { useSavingStore } from "@/app/stores/use-saving-store";
-import { useViewStore } from "@/app/stores/use-view-store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { View } from "@/server/db/schemas";
+import { useLoadingStore } from "@/stores/use-loading-store";
+import { useSavingStore } from "@/stores/use-saving-store";
+import { useViewStore } from "@/stores/use-view-store";
 import { api } from "@/trpc/react";
 import { Star } from "lucide-react";
 import { GoPencil } from "react-icons/go";
