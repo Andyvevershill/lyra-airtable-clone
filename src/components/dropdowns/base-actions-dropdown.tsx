@@ -106,32 +106,30 @@ export function BaseActionsDropdown({ base, setEditMode }: Props) {
     <div className="flex flex-row gap-1">
       {/* Favourite Star Button */}
       <div className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-        <Menubar className="h-8 w-8 border-0 bg-transparent p-0">
-          <MenubarMenu>
-            <MenubarTrigger asChild>
-              <div
-                onClick={handleFavourite}
-                className="IC flex h-8 w-8 cursor-pointer rounded-md border border-gray-200 hover:shadow-sm"
-              >
-                <Star
-                  size={16}
-                  className={
-                    base.isFavourite // Use prop directly
-                      ? "fill-yellow-500 text-yellow-500"
-                      : "text-gray-400"
-                  }
-                />
-              </div>
-            </MenubarTrigger>
-          </MenubarMenu>
-        </Menubar>
+        <div
+          onClick={handleFavourite}
+          className="IC flex h-8 w-8 cursor-pointer rounded-md border border-gray-200 hover:shadow-sm"
+          data-testid="favourite-button"
+        >
+          <Star
+            size={16}
+            className={
+              base.isFavourite
+                ? "fill-yellow-500 text-yellow-500"
+                : "text-gray-400"
+            }
+          />
+        </div>
       </div>
 
       {/* Three Dots Menu */}
       <div className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
         <Menubar className="h-8 w-8 border-0 bg-transparent p-0">
           <MenubarMenu>
-            <MenubarTrigger className="IC flex h-8 w-8 cursor-pointer rounded-md border border-gray-200 hover:shadow-sm">
+            <MenubarTrigger
+              className="IC flex h-8 w-8 cursor-pointer rounded-md border border-gray-200 hover:shadow-sm"
+              data-testid="base-menu-button"
+            >
               <BsThreeDots size={16} />
             </MenubarTrigger>
             <MenubarContent
