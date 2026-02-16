@@ -55,6 +55,7 @@ export function TableTabDropdown({ base, activeTab, setTables }: Props) {
             <MenubarTrigger
               className="pointer-IC h-8 w-8 p-0"
               onClick={() => setIsOpen(!isOpen)}
+              data-testid="table-dropdown-button"
             >
               <RiArrowDownSLine
                 size={16}
