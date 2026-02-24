@@ -35,7 +35,7 @@ export function DashboardTopNav({ user }: props) {
           <TooltipTrigger asChild>
             <SidebarTrigger className="pointer" />
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="center">
+          <TooltipContent className="z-2000" side="bottom" align="center">
             {sideBarOpen ? "Collapse sidebar" : "Expand sidebar"}
           </TooltipContent>
         </Tooltip>
