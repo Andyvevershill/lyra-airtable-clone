@@ -76,11 +76,20 @@ export const baseRouter = createTRPCRouter({
       // 5. Create the cells (3 rows × 6 columns = 18 cells)
       const cellsToCreate = [];
       for (const row of createdRows) {
+        const rowStatus = returnFakerData("string", "Status");
+
         for (const column of createdColumns) {
+          const value =
+            column.name === "Done"
+              ? String(rowStatus === "Done")
+              : column.name === "Status"
+                ? rowStatus
+                : returnFakerData(column.type, column.name);
+
           cellsToCreate.push({
             rowId: row.id,
             columnId: column.id,
-            value: returnFakerData(column.type, column.name),
+            value,
           });
         }
       }
