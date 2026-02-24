@@ -164,35 +164,36 @@ export function generateBulkFakerData(
 }
 
 // generates faker data depending on what the column type is (single return)
-export function returnFakerData(type: string, columnName: string) {
-  let data = "";
-
-  switch (type || columnName?.toLowerCase()) {
-    case "string":
-      data = faker.person.firstName();
-      break;
-    case "number":
-      data = faker.number.int({ max: 1000 }).toString();
-      break;
-    case "boolean":
-      data = faker.datatype.boolean().toString();
-      break;
-    case "notes":
-      data = faker.lorem.sentence();
-      break;
-    case "status":
-      data = faker.helpers.arrayElement([
-        "active",
-        "pending",
-        "completed",
-        "cancelled",
-      ]);
-      break;
-    default:
-      data = "string";
+export function returnFakerData(type: string, colName: string): string {
+  if (colName === "Status") {
+    return faker.helpers.arrayElement([
+      "Todo",
+      "In Progress",
+      "In Review",
+      "Done",
+    ]);
   }
 
-  return data;
+  if (colName === "Notes") {
+    return faker.helpers.arrayElement([
+      faker.word.adjective(),
+      `${faker.word.adjective()} ${faker.word.adjective()}`,
+    ]);
+  }
+
+  if (colName === "Assignee" || colName === "Name") {
+    return faker.person.fullName();
+  }
+
+  // Fall back to type-based generation for future added columns
+  switch (type) {
+    case "string":
+      return faker.person.firstName();
+    case "number":
+      return String(faker.number.int({ min: 1, max: 1000 }));
+    default:
+      return "";
+  }
 }
 
 export function showNotFunctionalToast() {
